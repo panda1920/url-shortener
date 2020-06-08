@@ -1,0 +1,5 @@
+# editor settings
+*.code-workspace
+
+# dependencies
+node_modules/
