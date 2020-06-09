@@ -5,7 +5,8 @@ module.exports = {
         es2020: true
     },
     plugins: [
-        'vue'
+        'vue',
+        'jest',
     ],
     extends: [
         'eslint:recommended',
@@ -19,5 +20,12 @@ module.exports = {
         semi: [1, 'always'],
         quotes: [1, 'single'],
     },
-    ignorePatterns: [ '.eslintrc.js', 'build/*', ]
+    overrides: [
+        {
+            files: ['*.test.js'],
+            env: { 'jest/globals': true },
+            extends: ['plugin:jest/recommended'],
+        }
+    ],
+    ignorePatterns: ['.eslintrc.js', 'build/*', '*.config.js'],
 };

@@ -8,14 +8,14 @@ const projectRoot = path.dirname(__dirname);
 
 module.exports = env => {
     const isProduction = env.NODE_ENV === 'production';
-    const mode = isProduction ? 'production': 'development';
-    const devtool = isProduction ? false: '#eval-source-map';
+    const mode = isProduction ? 'production' : 'development';
+    const devtool = isProduction ? false : '#eval-source-map';
 
     return {
         mode,
         devtool,
         entry: {
-            main: './index.js'
+            main: path.join(projectRoot, 'index.js')
         },
         output: {
             filename: '[name].bundle.js',
@@ -32,7 +32,7 @@ module.exports = env => {
             new CleanWebpackPlugin(),
             new HtmlWebpackPlugin({
                 filename: 'index.html',
-                template: './src/template.html',
+                template: path.join(projectRoot, 'src', 'template.html')
             }),
             new VueLoaderPlugin()
         ],
