@@ -19,6 +19,9 @@ module.exports = {
     rules: {
         semi: [1, 'always'],
         quotes: [1, 'single'],
+
+        'vue/html-quotes': [1, 'single'],
+        'vue/max-attributes-per-line': 0,
     },
     overrides: [
         {

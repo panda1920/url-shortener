@@ -1,11 +1,25 @@
-import { mount } from '@vue/test-utils';
-import App from '../App.vue';
+import { shallowMount } from '@vue/test-utils';
+
+import App from '@/App.vue';
+import Header from '@/components/Header.vue';
+
+function mountComponent(component, options = {}) {
+    return shallowMount(component, {
+        // data: () => {},
+        propsData: {},
+        stubs: {
+            Header: true,
+        },
+        mocks: {},
+        ...options,
+    });
+}
 
 describe('testing behavior of App component', () => {
     let mountedApp;
 
     beforeEach(() => {
-        mountedApp = mount(App);
+        mountedApp = mountComponent(App);
     });
 
     test('title should be displayed', () => {
@@ -27,4 +41,13 @@ describe('testing behavior of App component', () => {
 
         expect(counterValue.text()).toBe('1');
     });
+
+    test('header component should be displayed', () => {
+        const headerWrapper = mountedApp.findComponent(Header);
+        expect(headerWrapper.exists()).toBe(true);
+    }); 
+
+    test.skip('app should go fetch new token when it mounts', () => {
+
+    }); 
 });

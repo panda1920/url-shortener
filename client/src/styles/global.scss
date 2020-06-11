@@ -1,0 +1,18 @@
+// sets constants to be used by styles around the app
+
+$primary-color: rgb(78, 78, 78);
+$secondary-color: rgb(188, 215, 255);
+
+$header-height: 50px;
+$header-font-size: 20px;
+
+$main-width: 800px;
+$h-padding: calc((100vw - #{$main-width}) / 2);
+
+// mixins
+
+@mixin v-center {
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
+}
