@@ -7,30 +7,85 @@ describe('testing behavior of Header component', () => {
     let mountedComponent;
 
     beforeEach(() => {
-        mountedComponent = shallowMount(Header);
+        mountedComponent = shallowMount(Header, {
+            mocks: {
+                $router: {
+                    push: jest.fn().mockName('mocked $route.push()')
+                },
+            },
+            propsData: {
+                loginInfo: {
+                    username: 'admin@example.com',
+                    token: 'some_random_token',
+                },
+                clearLoginInfo: jest.fn().mockName('mocked clearLoginInfo()'),
+            },
+        });
+    });
+    
+    describe('elements are displayed', () => {
+        test('app title should be rendered on screen', () => {
+            expect(mountedComponent.html()).toMatch(APP_TITLE);
+        });
+    
+        test('login button should be displayed when not logged in', () => {
+            // mount component without login data
+            mountedComponent = shallowMount(Header, {
+                propsData: {
+                    loginInfo: { username: '' }
+                }
+            });
+
+            expect(() => {
+                mountedComponent.get('#login');
+            }).not.toThrow();   
+            
+            expect(() => {
+                mountedComponent.get('#logout');
+            }).toThrow();
+        });
+    
+        test('logout button should be displayed when logged in', () => {
+            expect(() => {
+                mountedComponent.get('#login');
+            }).toThrow(); 
+
+            expect(() => {
+                mountedComponent.get('#logout');
+            }).not.toThrow();
+        });
     });
 
-    test('app title should be rendered on screen', () => {
-        expect(mountedComponent.text()).toBe(APP_TITLE);
-    });
+    describe('testing logic', () => {
+        test('clicking on login button should push /login route to history API', async () => {
+            mountedComponent = shallowMount(Header, {
+                mocks: {
+                    $router: {
+                        push: jest.fn().mockName('mocked $route.push()')
+                    },
+                },
+                propsData: {
+                    loginInfo: { username: '' }
+                }
+            });
 
-    test.skip('login button should be displayed when have token', () => {
-        
-    });
+            await mountedComponent.get('#login').trigger('click');
 
-    test.skip('signout button should be displayed when no token', () => {
-        
-    });
+            expect(mountedComponent.vm.$router.push).toHaveBeenCalledTimes(1);
+            expect(mountedComponent.vm.$router.push).lastCalledWith('/login');
+        });
+    
+        test('clicking on app title should push /home route to history API', async () => {
+            await mountedComponent.get('#title').trigger('click');
 
-    test.skip('clicking on login button should push /login route to history API', () => {
-        
-    });
+            expect(mountedComponent.vm.$router.push).toHaveBeenCalledTimes(1);
+            expect(mountedComponent.vm.$router.push).lastCalledWith('/home');
+        });
+    
+        test('clicking on logout button should invoke callback to clear login', async () => {
+            await mountedComponent.get('#logout').trigger('click');
 
-    test.skip('clicking on home button should push /home route to history API', () => {
-
-    });
-
-    test.skip('clicking on logout button should clear local storage of its token and user info', () => {
-
+            expect(mountedComponent.vm.$props.clearLoginInfo).toHaveBeenCalledTimes(1);
+        });
     });
 });

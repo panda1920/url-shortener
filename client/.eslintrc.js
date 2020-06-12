@@ -19,6 +19,7 @@ module.exports = {
     rules: {
         semi: [1, 'always'],
         quotes: [1, 'single'],
+        'no-unused-vars': [1, { varsIgnorePattern: '^_$' }],
 
         'vue/html-quotes': [1, 'single'],
         'vue/max-attributes-per-line': 0,
