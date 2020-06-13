@@ -1,6 +1,6 @@
 <template>
   <div class='app'>
-    <Header />
+    <Header :login-info='loginInfo' :clear-login-info='clearLoginInfo' />
     This is a url-shortener App!
     <button @click='increment'>
       Click me!
@@ -16,14 +16,24 @@
 
   export default {
     components: { Header },
+
     data: () => ({
       counter: 0,
       someData: 12,
+      loginInfo: {
+        token: '',
+        username: '',
+      },
     }),
+
     methods: {
       increment() {
         this.counter++;
-      }
+      },
+      clearLoginInfo() {
+        this.loginInfo.token = '';
+        this.loginInfo.username = '';
+      },
     },
   };
 </script>

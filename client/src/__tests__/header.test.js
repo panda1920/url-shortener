@@ -10,7 +10,7 @@ describe('testing behavior of Header component', () => {
         mountedComponent = shallowMount(Header, {
             mocks: {
                 $router: {
-                    push: jest.fn().mockName('mocked $route.push()')
+                    push: jest.fn().mockName('mocked $router.push()')
                 },
             },
             propsData: {
@@ -61,7 +61,7 @@ describe('testing behavior of Header component', () => {
             mountedComponent = shallowMount(Header, {
                 mocks: {
                     $router: {
-                        push: jest.fn().mockName('mocked $route.push()')
+                        push: jest.fn().mockName('mocked $router.push()')
                     },
                 },
                 propsData: {

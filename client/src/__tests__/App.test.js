@@ -9,6 +9,7 @@ function mountComponent(component, options = {}) {
         propsData: {},
         stubs: {
             Header: true,
+            Something: true,
         },
         mocks: {},
         ...options,
@@ -45,7 +46,28 @@ describe('testing behavior of App component', () => {
     test('header component should be displayed', () => {
         const headerWrapper = mountedApp.findComponent(Header);
         expect(headerWrapper.exists()).toBe(true);
-    }); 
+    });
+
+    describe('data is passed correctly to subcomponents', () => {
+        test('loginInfo and callback is passed to header', () => {
+            const TEST_LOGININFO = {
+                token: '123123123',
+                username: '23123123123'
+            };
+
+            mountedApp = mountComponent(App, {
+                data: () => ({
+                    counter: 0,
+                    someData: 12,
+                    loginInfo: TEST_LOGININFO
+                }),
+            });
+
+            const wrappeedHeader = mountedApp.findComponent(Header);
+            expect(wrappeedHeader.vm.$props.loginInfo).toMatchObject(TEST_LOGININFO);
+            expect(wrappeedHeader.vm.$props.clearLoginInfo).toBe(mountedApp.vm.clearLoginInfo);
+        });
+    });
 
     test.skip('app should go fetch new token when it mounts', () => {
 
