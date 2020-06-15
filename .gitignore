@@ -6,3 +6,6 @@ node_modules/
 
 # compiled files
 dist/
+
+# ignore sample app
+worker/sample/*

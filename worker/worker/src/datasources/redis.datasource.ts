@@ -5,7 +5,16 @@ import {
   ValueOrPromise,
 } from '@loopback/core';
 import {juggler} from '@loopback/repository';
-import config from './redis.datasource.config.json';
+
+export const redisConfig = {
+    name: "redis",
+    connector: "kv-redis",
+    url: "",
+    host: process.env.REDIS_HOST || 'localhost',
+    port: process.env.REDIS_PORT || 6379,
+    password: process.env.REDIS_PASSWORD || "",
+    db: process.env.REDIS_DBNAME || 0,
+};
 
 @lifeCycleObserver('datasource')
 export class RedisDataSource extends juggler.DataSource
@@ -14,7 +23,7 @@ export class RedisDataSource extends juggler.DataSource
 
   constructor(
     @inject('datasources.config.redis', {optional: true})
-    dsConfig: object = config,
+    dsConfig: object = redisConfig,
   ) {
     super(dsConfig);
   }

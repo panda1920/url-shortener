@@ -5,7 +5,18 @@ import {
   ValueOrPromise,
 } from '@loopback/core';
 import {juggler} from '@loopback/repository';
-import config from './mongo.datasource.config.json';
+
+export const mongoConfig = {
+    name: "mongo",
+    connector: "mongodb",
+    url: "",
+    host: process.env.MONGO_HOST || "localhost",
+    port: process.env.MONGO_PORT || "27017",
+    user: process.env.MONGO_USER || null,
+    password: process.env.MONGO_PASSWORD || null,
+    database: process.env.MONGO_DBNAME || "url-shortener",
+    useNewUrlParser: true
+};
 
 @lifeCycleObserver('datasource')
 export class MongoDataSource extends juggler.DataSource
@@ -14,7 +25,7 @@ export class MongoDataSource extends juggler.DataSource
 
   constructor(
     @inject('datasources.config.mongo', {optional: true})
-    dsConfig: object = config,
+    dsConfig: object = mongoConfig,
   ) {
     super(dsConfig);
   }

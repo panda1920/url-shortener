@@ -1,4 +1,4 @@
-# setup storage locally for testing purposes
+# setup app to test locally
 version: '3.5'
 
 services:
@@ -6,7 +6,7 @@ services:
     image: mongo:latest
     container_name: url-shortener-mongo
     volumes:
-      - redis:/data/db
+      - mongo:/data/db
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongoadmin
       - MONGO_INITDB_ROOT_PASSWORD=password
@@ -17,9 +17,23 @@ services:
     image: redis:latest
     container_name: url-shortener-redis
     volumes:
-      - mongo:/data
+      - redis:/data
     ports:
       - '6379:6379'
+
+  worker:
+    image: panad1920/url-shortener:latest
+    build:
+      context: ./worker/worker
+    container_name: url-shortener-worker
+    environment:
+      - MONGO_HOST=mongo
+      - REDIS_HOST=redis
+    ports:
+      - '3000:3000'
+    depends_on:
+      - mongo
+      - redis
 
 volumes:
   mongo:

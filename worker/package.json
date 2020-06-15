@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@loopback/cli": "^2.7.1"
+    "@loopback/cli": "^2.9.0"
   }
 }
