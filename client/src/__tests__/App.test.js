@@ -63,9 +63,9 @@ describe('testing behavior of App component', () => {
                 }),
             });
 
-            const wrappeedHeader = mountedApp.findComponent(Header);
-            expect(wrappeedHeader.vm.$props.loginInfo).toMatchObject(TEST_LOGININFO);
-            expect(wrappeedHeader.vm.$props.clearLoginInfo).toBe(mountedApp.vm.clearLoginInfo);
+            const stubHeader = mountedApp.findComponent(Header);
+            expect(stubHeader.vm.$props.loginInfo).toMatchObject(TEST_LOGININFO);
+            expect(stubHeader.vm.$props.clearLoginInfo).toBe(mountedApp.vm.clearLoginInfo);
         });
     });
 
