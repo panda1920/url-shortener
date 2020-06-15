@@ -22,7 +22,12 @@ describe('testing behavior of Login component', () => {
             propsData: {
                 parseAuthenticationToken: jest.fn()
                     .mockName('mocked parseAuthenticationToken()'),
-            }
+            },
+            mocks: {
+                $router: {
+                    push: jest.fn().mockName('mocked $router.push'),
+                }
+            },
         });
 
         originalFetch = window.fetch;
@@ -161,6 +166,16 @@ describe('testing behavior of Login component', () => {
 
             expect(wrapper.vm.parseAuthenticationToken).toHaveBeenCalledTimes(1);
             expect(wrapper.vm.parseAuthenticationToken).toHaveBeenLastCalledWith(TEST_TOKEN);
+        });
+
+        test('successful login should jump to root path', async () => {
+            await setInput(wrapper);
+            await wrapper.get('#button-login').trigger('click');
+            await wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.vm.$router.push).toHaveBeenCalledTimes(1);
+            expect(wrapper.vm.$router.push).toHaveBeenLastCalledWith('/');
         });
 
         test('failed api call should show error', async () => {

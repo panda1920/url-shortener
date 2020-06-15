@@ -42,6 +42,7 @@
         try {
           const { token } = await this.fetchUserAuthToken();
           this.parseAuthenticationToken(token);
+          this.$router.push('/');
         }
         catch (e) {
           this.error = e;

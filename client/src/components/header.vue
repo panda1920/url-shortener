@@ -4,10 +4,10 @@
       URL-SHORTENER
     </p>
     <div v-if='isLoggedIn' id='logout' @click='logout'>
-      LOGIN
-    </div>
-    <div v-if='!isLoggedIn' id='login' @click='goLogin'>
       LOGOUT
+    </div>
+    <div v-else id='login' @click='goLogin'>
+      LOGIN
     </div>
   </header>
 </template>
@@ -29,7 +29,7 @@
 
     computed: {
       isLoggedIn() {
-        return !!this.loginInfo.username;
+        return this.loginInfo.username !== '';
       }
     },
 
@@ -38,7 +38,7 @@
         this.$router.push('/login');
       },
       goHome() {
-        this.$router.push('/home');
+        this.$router.push('/');
       },
       logout() {
         this.clearLoginInfo();

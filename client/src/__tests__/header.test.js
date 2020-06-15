@@ -38,7 +38,7 @@ describe('testing behavior of Header component', () => {
 
             expect(() => {
                 mountedComponent.get('#login');
-            }).not.toThrow();   
+            }).not.toThrow();
             
             expect(() => {
                 mountedComponent.get('#logout');
@@ -75,11 +75,11 @@ describe('testing behavior of Header component', () => {
             expect(mountedComponent.vm.$router.push).lastCalledWith('/login');
         });
     
-        test('clicking on app title should push /home route to history API', async () => {
+        test('clicking on app title should push / route to history API', async () => {
             await mountedComponent.get('#title').trigger('click');
 
             expect(mountedComponent.vm.$router.push).toHaveBeenCalledTimes(1);
-            expect(mountedComponent.vm.$router.push).lastCalledWith('/home');
+            expect(mountedComponent.vm.$router.push).lastCalledWith('/');
         });
     
         test('clicking on logout button should invoke callback to clear login', async () => {
