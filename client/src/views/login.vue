@@ -17,15 +17,12 @@
 </template>
 
 <script>
+  import userAuthMixin from '../mixins/user-auth';
+
   export default {
     name: 'Login',
-
-    props: {
-      parseAuthenticationToken: {
-        type: Function,
-        default: () => () => true,
-      }
-    },
+    
+    mixins: [userAuthMixin],
 
     data: () => ({
       error: '',
@@ -40,8 +37,7 @@
           return;
 
         try {
-          const { token } = await this.fetchUserAuthToken();
-          this.parseAuthenticationToken(token);
+          await this.login(this.username, this.password);
           this.$router.push('/');
         }
         catch (e) {
@@ -60,20 +56,7 @@
 
         return this.error === '';
       },
-
-      async fetchUserAuthToken() {
-        const response = await window.fetch('/some_api', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: this.username, password: this.password }),
-        });
-
-        if (!response.ok)
-          throw 'api call failed';
-
-        return response.json();
-      }
-    }
+    },
   };
 </script>
 

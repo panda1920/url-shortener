@@ -37,14 +37,19 @@ export class ShortenController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(UrlMappingToShort, {
-            title: 'NewUrlMappingToShort',
-            exclude: ['id'],
-          }),
+          schema: {
+            title: 'Url shorten request',
+            type: 'object',
+            properties: {
+              url: { type: 'string', }
+            },
+            required: ['url'],
+            examples: [{ url: 'www.google.com' }],
+          }
         },
       },
     })
-    urlMappingToShort: Omit<UrlMappingToShort, 'id'>,
+    urlMappingToShort: { url: string; },
   ): Promise<UrlMappingToShort> {
     return this.urlMappingToShortMongoRepository.create(urlMappingToShort);
   }

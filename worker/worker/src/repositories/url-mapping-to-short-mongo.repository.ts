@@ -1,7 +1,9 @@
-import {DefaultCrudRepository} from '@loopback/repository';
+import {DefaultCrudRepository, DataObject, Options} from '@loopback/repository';
 import {UrlMappingToShort, UrlMappingToShortRelations} from '../models';
 import {MongoDataSource} from '../datasources';
 import {inject} from '@loopback/core';
+
+import { v4 } from 'uuid';
 
 export class UrlMappingToShortMongoRepository extends DefaultCrudRepository<
   UrlMappingToShort,
@@ -12,5 +14,11 @@ export class UrlMappingToShortMongoRepository extends DefaultCrudRepository<
     @inject('datasources.mongo') dataSource: MongoDataSource,
   ) {
     super(UrlMappingToShort, dataSource);
+  }
+
+  create(entity: DataObject<UrlMappingToShort>, options?: Options): Promise<UrlMappingToShort> {
+    entity.id = v4();
+    entity.shortened = 'some_shortened_url';
+    return super.create(entity, options);
   }
 }

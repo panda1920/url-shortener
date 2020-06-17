@@ -4,39 +4,30 @@ import Login from '@/views/login.vue';
 
 describe('testing behavior of Login component', () => {
     let wrapper;
-    let originalFetch;
-    const TEST_TOKEN = '12123123123123';
-    const mockFetch = jest.fn()
-        .mockName('mocked fetch()')
-        .mockImplementation(() => Promise.resolve({
-            ok: true,
-            status: 200,
-            json: () => Promise.resolve({ token: TEST_TOKEN }),
-        }));
+    const mockLogin = jest.fn()
+        .mockName('mocked login() function from mixin');
 
     beforeEach(() => {
-        wrapper = shallowMount(Login, {
+        wrapper = mountLogin();
+    });
+    afterEach(() => {
+        mockLogin.mockClear();
+    });
+    
+    function mountLogin(options = {}) {
+        return shallowMount(Login, {
             data: () => ({
                 error: ''
             }),
-            propsData: {
-                parseAuthenticationToken: jest.fn()
-                    .mockName('mocked parseAuthenticationToken()'),
-            },
             mocks: {
                 $router: {
                     push: jest.fn().mockName('mocked $router.push'),
-                }
+                },
             },
+            mixins: [{ methods: { login: mockLogin } }],
+            ...options,
         });
-
-        originalFetch = window.fetch;
-        window.fetch = mockFetch;
-    });
-    afterEach(() => {
-        window.fetch = originalFetch;
-        mockFetch.mockClear();
-    });
+    }
 
     describe('elements are displayed', () => {
         test('title is displayed', () => {
@@ -141,34 +132,23 @@ describe('testing behavior of Login component', () => {
                 await wrapper.get('#button-login').trigger('click');
             }
 
-            expect(mockFetch).toHaveBeenCalledTimes(0);
+            expect(mockLogin).toHaveBeenCalledTimes(0);
         });
 
         test('clicking on login should send request to api when validation succeeds', async () => {
             await setInput(wrapper);
             await wrapper.get('#button-login').trigger('click');
-
-            expect(mockFetch).toHaveBeenCalledTimes(1);
-            const [_, options] = mockFetch.mock.calls[0];
-            expect(options.method).toBe('POST');
-            expect(options.headers).toMatchObject({ 'Content-Type': 'application/json' });
-            expect(JSON.parse(options.body)).toMatchObject({
-                username: 'default_user@example.com',
-                password: 'default_password',
-            });
-        });
-
-        test('clicking on login should invoke callback with token returned from api', async () => {
-            await setInput(wrapper);
-            await wrapper.get('#button-login').trigger('click');
-            await wrapper.vm.$nextTick();
             await wrapper.vm.$nextTick();
 
-            expect(wrapper.vm.parseAuthenticationToken).toHaveBeenCalledTimes(1);
-            expect(wrapper.vm.parseAuthenticationToken).toHaveBeenLastCalledWith(TEST_TOKEN);
+            expect(mockLogin).toHaveBeenCalledTimes(1);
+            expect(mockLogin).toHaveBeenLastCalledWith(
+                'default_user@example.com', 'default_password'
+            );
         });
 
         test('successful login should jump to root path', async () => {
+            expect(wrapper.vm.$router.push).toHaveBeenCalledTimes(0);
+            
             await setInput(wrapper);
             await wrapper.get('#button-login').trigger('click');
             await wrapper.vm.$nextTick();
@@ -179,12 +159,12 @@ describe('testing behavior of Login component', () => {
         });
 
         test('failed api call should show error', async () => {
-            window.fetch = jest.fn()
-                .mockName('mocked fetch()')
-                .mockImplementation(() => Promise.resolve({
-                    ok: false,
-                    status: 401,
-                }));
+            const mockLogin = jest.fn()
+                .mockName('mocked login()')
+                .mockImplementation(() => { throw 'api call failed'; });
+            wrapper = mountLogin({ 
+                mixins: [{ methods: { login: mockLogin } }]
+            });
 
             await setInput(wrapper);
             await wrapper.get('#button-login').trigger('click');
