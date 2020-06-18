@@ -24,6 +24,7 @@ module.exports = {
 
         'vue/html-quotes': [1, 'single'],
         'vue/max-attributes-per-line': 0,
+        'vue/html-self-closing': 0,
     },
     overrides: [
         {

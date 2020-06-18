@@ -5,23 +5,45 @@ import Header from '@/components/header.vue';
 describe('testing behavior of Header component', () => {
     const APP_TITLE = 'URL-SHORTENER';
     let mountedComponent;
+    const mockRouterPush = jest.fn().mockName('mocked $router.push()');
+    const mockLogout = jest.fn().mockName('mocked logout()');
 
     beforeEach(() => {
-        mountedComponent = shallowMount(Header, {
+        mountedComponent = mountHeader();
+    });
+    afterEach(() => {
+        mockRouterPush.mockClear();
+        mockLogout.mockClear();
+    });
+
+    function mountHeader(customConfig = {}) {
+        const { push, logout, loggedIn, path } = customConfig;
+        const isAuthenticated = () => (loggedIn === false) ? false : true;
+
+        return shallowMount(Header, {
             mocks: {
                 $router: {
-                    push: jest.fn().mockName('mocked $router.push()')
+                    push: push || mockRouterPush
+                },
+                $route: {
+                    path: path || '/'
                 },
             },
             propsData: {
                 loginInfo: {
-                    username: 'admin@example.com',
-                    token: 'some_random_token',
-                },
-                clearLoginInfo: jest.fn().mockName('mocked clearLoginInfo()'),
+                    username: 'default_user@example.com'
+                }
             },
+            mixins: [
+                {
+                    methods: {
+                        isAuthenticated,
+                        logout: logout || mockLogout
+                    }
+                },
+            ],
         });
-    });
+    }
     
     describe('elements are displayed', () => {
         test('app title should be rendered on screen', () => {
@@ -30,11 +52,7 @@ describe('testing behavior of Header component', () => {
     
         test('login button should be displayed when not logged in', () => {
             // mount component without login data
-            mountedComponent = shallowMount(Header, {
-                propsData: {
-                    loginInfo: { username: '' }
-                }
-            });
+            mountedComponent = mountHeader({ loggedIn: false });
 
             expect(() => {
                 mountedComponent.get('#login');
@@ -58,34 +76,41 @@ describe('testing behavior of Header component', () => {
 
     describe('testing logic', () => {
         test('clicking on login button should push /login route to history API', async () => {
-            mountedComponent = shallowMount(Header, {
-                mocks: {
-                    $router: {
-                        push: jest.fn().mockName('mocked $router.push()')
-                    },
-                },
-                propsData: {
-                    loginInfo: { username: '' }
-                }
-            });
+            mountedComponent = mountHeader({ loggedIn: false });
 
             await mountedComponent.get('#login').trigger('click');
 
-            expect(mountedComponent.vm.$router.push).toHaveBeenCalledTimes(1);
-            expect(mountedComponent.vm.$router.push).lastCalledWith('/login');
+            expect(mockRouterPush).toHaveBeenCalledTimes(1);
+            expect(mockRouterPush).lastCalledWith('/login');
         });
     
         test('clicking on app title should push / route to history API', async () => {
+            mountedComponent = mountHeader({ loggedIn: false, path: '/some_path' });
+
             await mountedComponent.get('#title').trigger('click');
 
-            expect(mountedComponent.vm.$router.push).toHaveBeenCalledTimes(1);
-            expect(mountedComponent.vm.$router.push).lastCalledWith('/');
+            expect(mockRouterPush).toHaveBeenCalledTimes(1);
+            expect(mockRouterPush).lastCalledWith('/');
         });
     
-        test('clicking on logout button should invoke callback to clear login', async () => {
+        test('clicking on logout button should invoke logout() of mixin', async () => {
             await mountedComponent.get('#logout').trigger('click');
 
-            expect(mountedComponent.vm.$props.clearLoginInfo).toHaveBeenCalledTimes(1);
+            expect(mockLogout).toHaveBeenCalledTimes(1);
+        });
+
+        test('clicking on login button should not invoke router push when already on login page', async () => {
+            mountedComponent = mountHeader({ loggedIn: false, path: '/login' });
+
+            await mountedComponent.get('#login').trigger('click');
+
+            expect(mockRouterPush).toHaveBeenCalledTimes(0);
+        });
+
+        test('clicking on title button should not invoke router push when already on root page', async () => {
+            await mountedComponent.get('#title').trigger('click');
+
+            expect(mockRouterPush).toHaveBeenCalledTimes(0);
         });
     });
 });

@@ -9,6 +9,10 @@ $header-font-size: 20px;
 $main-width: 800px;
 $h-padding: calc((100vw - #{$main-width}) / 2);
 
+$font-size-normal: 16px;
+$font-size-input: 24px;
+$font-size-heading: 40px;
+
 // mixins
 
 @mixin v-center {

@@ -1,27 +1,38 @@
 <template>
   <div class='home'>
-    <div id='description'>
-      {{ description }}
+    <div class='shorten-introduction'>
+      <div id='description'>
+        {{ description }}
+      </div>
+      <div id='instruction'>
+        {{ instruction }}
+      </div>
     </div>
-    <div id='instruction'>
-      {{ instruction }}
-    </div>
-    <input id='url' v-model='url' type='text' placeholder='Shorten url'>
-    <button id='shorten-button' @click='shorten'>
-      Shorten
-    </button>
-    <div v-if='error' id='error'>
-      {{ error }}
-    </div>
-    <div v-if='shortened' id='shortened'>
-      {{ shortened }}
+
+    <div class='shorten-main'>
+      <div class='shorten-input'>
+        <input id='url' v-model='url' type='text' placeholder='Shorten url'>
+        <button id='shorten-button' @click='shorten'>
+          Shorten
+        </button>
+      </div>
+      <div v-if='error' id='error'>
+        {{ error }}
+      </div>
+      <div v-if='shortened' id='shortened'>
+        {{ shortened }}
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+  import userAuthMixin from '@/mixins/user-auth';
+
   export default {
     name: 'Home',
+
+    mixins: [userAuthMixin],
 
     data: () => ({
       description: 'Make links shorter: the future of web',
@@ -34,6 +45,11 @@
     methods: {
       async shorten() {
         this.resetResult();
+
+        if (!this.isAuthenticated()) {
+          this.error = 'You must be logged in to use our service';
+          return;
+        }
 
         if (!this.validateUrl()) {
           this.error = 'Enter a valid url';
@@ -74,7 +90,41 @@
 </script>
 
 <style lang='scss' scoped>
+  @import '../styles/global';
+
   .home {
-    padding: 50px $h-padding;
+    .shorten-introduction {
+      padding: 50px $h-padding;
+
+      #description {
+        font-size: $font-size-heading;
+        font-weight: 1200;
+      }
+    }
+
+    .shorten-main {
+      padding: 1em $h-padding;
+      background-color: $primary-color;
+      font-size: $font-size-input;
+
+      .shorten-input {
+        display: flex;
+        flex-direction: row;
+
+        input {
+          flex: 9 1 auto;
+          margin-right: 5px;
+          padding: 15px 10px;
+
+          border-radius: 5px;
+        }
+
+        button {
+          flex: 1 1 auto;
+
+          border-radius: 5px;
+        }
+      }
+    }
   }
 </style>

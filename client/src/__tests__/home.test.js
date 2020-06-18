@@ -15,7 +15,7 @@ describe('testing behavior of Home component', () => {
     let mountedComponent;
 
     beforeEach(() => {
-        mountedComponent = shallowMount(Home);
+        mountedComponent = mountHome();
         
         originalFetch = window.fetch;
         window.fetch = mockedFetch;
@@ -24,6 +24,15 @@ describe('testing behavior of Home component', () => {
     afterEach(() => {
         window.fetch = originalFetch;
     });
+
+    function mountHome(customConfig = {}) {
+        const { loggedIn } = customConfig;
+        const isAuthenticated = () => (loggedIn === false) ? false : true;
+
+        return shallowMount(Home, {
+            mixins: [{ methods: { isAuthenticated } }],
+        });
+    }
 
     describe('elements are displayed', () => {
         test('description is displayed', () => {
@@ -107,7 +116,16 @@ describe('testing behavior of Home component', () => {
             }
         });
 
-        test('cliking on shorten should make api call if url is valid', async () => {
+        test('clicking on shorten should show error if not logged in', async () => {
+            mountedComponent = mountHome({ loggedIn: false });
+
+            mountedComponent.get('#url').setValue('www.google.com');
+            await mountedComponent.get('#shorten-button').trigger('click');
+
+            expect(mountedComponent.vm.$data.error).not.toBe('');
+        });
+
+        test('clicking on shorten should make api call if url is valid', async () => {
             const url = 'www.google.com';
             mountedComponent.get('#url').setValue(url);
 

@@ -26,6 +26,14 @@ const userAuthMixin = {
             console.log('refresh');
         },
 
+        getUsername() {
+            return window.localStorage.getItem('username');
+        },
+
+        getToken() {
+            return window.localStorage.getItem('token');
+        },
+
         isAuthenticated() {
             return !!window.localStorage.getItem('username');
         }

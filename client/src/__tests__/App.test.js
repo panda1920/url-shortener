@@ -1,7 +1,11 @@
-import { shallowMount } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Router from 'vue-router';
 
 import App from '@/App.vue';
 import Header from '@/components/Header.vue';
+
+const localVue = createLocalVue();
+localVue.use(Router);
 
 function mountComponent(component, options = {}) {
     return shallowMount(component, {
@@ -12,6 +16,7 @@ function mountComponent(component, options = {}) {
             Something: true,
         },
         mocks: {},
+        localVue,
         ...options,
     });
 }
@@ -23,16 +28,16 @@ describe('testing behavior of App component', () => {
         mountedApp = mountComponent(App);
     });
 
-    test('title should be displayed', () => {
+    test.skip('title should be displayed', () => {
         expect(mountedApp.html()).toContain('This is a url-shortener App!');
     });
 
-    test('button should be displayed', () => {
+    test.skip('button should be displayed', () => {
         // get() will throw if element/component does not exist
         expect(() => mountedApp.get('button')).not.toThrow();
     });
 
-    test('clicking on button should increment counter', async () => {
+    test.skip('clicking on button should increment counter', async () => {
         const counterValue = mountedApp.get('#count');
         const button = mountedApp.get('button');
         
@@ -48,7 +53,7 @@ describe('testing behavior of App component', () => {
         expect(headerWrapper.exists()).toBe(true);
     });
 
-    describe('data is passed correctly to subcomponents', () => {
+    describe.skip('data is passed correctly to subcomponents', () => {
         test('loginInfo and callback is passed to header', () => {
             const TEST_LOGININFO = {
                 token: '123123123',

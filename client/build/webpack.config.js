@@ -1,8 +1,11 @@
 const path = require('path');
+const webpack = require('webpack');
 
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
+
+const config = require('./env');
 
 const projectRoot = path.dirname(__dirname);
 
@@ -34,7 +37,11 @@ module.exports = env => {
                 filename: 'index.html',
                 template: path.join(projectRoot, 'src', 'template.html')
             }),
-            new VueLoaderPlugin()
+            new VueLoaderPlugin(),
+            new webpack.DefinePlugin({
+                ...config,
+                'process.env.NODE_ENV': JSON.stringify(mode)
+            }),
         ],
         module: {
             rules: [

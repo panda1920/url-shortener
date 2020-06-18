@@ -1,13 +1,14 @@
 <template>
   <div class='app'>
     <Header :login-info='loginInfo' :clear-login-info='clearLoginInfo' />
-    This is a url-shortener App!
+    <!-- This is a url-shortener App!
     <button @click='increment'>
       Click me!
-    </button>
-    <div id='count'>
+    </button> -->
+    <!-- <div id='count'>
       {{ counter }}
-    </div>
+    </div> -->
+    <router-view></router-view>
   </div>
 </template>
 
@@ -29,6 +30,8 @@
     methods: {
       increment() {
         this.counter++;
+        console.log(process.env.NODE_ENV);
+        console.log(process.env.API_PATH);
       },
       clearLoginInfo() {
         this.loginInfo.token = '';
@@ -39,12 +42,15 @@
 </script>
 
 <style lang='scss'>
+  @import './styles/global';
+
   * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 
     font-family: 'Open Sans', sans-serif;
+    font-size: $font-size-normal;
   }
 </style>
 
