@@ -4,8 +4,18 @@
       Login
     </p>
 
-    <input id='input-username' v-model='username' type='text'>
-    <input id='input-password' v-model='password' type='password'>
+    <input
+      id='input-username'
+      v-model='username'
+      type='text'
+      placeholder='Email'
+    >
+    <input
+      id='input-password'
+      v-model='password'
+      type='password'
+      placeholder='Password'
+    >
     <button id='button-login' @click='loginHandler'>
       Login
     </button>
@@ -60,6 +70,26 @@
   };
 </script>
 
-<style>
+<style lang='scss' scoped>
+  @import '../styles/global';
+
+  .login {
+    padding: 100px $h-padding;
+
+    input {
+      @include form-element;
+      width: calc(#{$main-width} / 2);
+    }
+
+    button {
+      @include form-element;
+      width: calc(#{$main-width} / 5);
+    }
+  }
+
+  #title {
+    font-size: $font-size-heading;
+    margin-bottom: $vertical-space-medium;
+  }
 
 </style>

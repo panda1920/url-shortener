@@ -13,10 +13,34 @@ $font-size-normal: 16px;
 $font-size-input: 24px;
 $font-size-heading: 40px;
 
+$vertical-space-small: 16px;
+$vertical-space-medium: 32px;
+
 // mixins
 
 @mixin v-center {
     position: absolute;
     top: 50%;
     transform: translate(0, -50%);
+}
+
+@mixin header-button {
+    cursor: pointer;
+
+    &:hover {
+        color: darken($secondary-color, 10%);
+    }
+}
+
+@mixin form-element {
+    display: block;
+    padding: 5px;
+    margin-bottom: $vertical-space-small;
+    
+    border-radius: 5px;
+    border-color: lighten($primary-color, 20%);
+
+    &:focus {
+        border-color: $secondary-color;
+    }
 }

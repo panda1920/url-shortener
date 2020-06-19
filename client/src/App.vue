@@ -52,6 +52,22 @@
     font-family: 'Open Sans', sans-serif;
     font-size: $font-size-normal;
   }
+
+  button, input {
+    background: none;
+    background-color: transparent;
+    background-image: none;
+    outline: none;
+    appearance: none;
+    box-shadow: none;
+    border: 1px solid $primary-color;
+  }
+
+  button {
+    cursor: pointer;
+    background-color: $secondary-color;
+  }
+
 </style>
 
 <style lang='scss' scoped>

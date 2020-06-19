@@ -10,7 +10,7 @@ Attempt to recreate a url-shortener app from scratch.
 1. Clone this repo
 2. cd into the cloned repo directory
 3. Run the following command
-    ```
-    docker-compose up -d
-    ```
+```
+docker-compose up -d
+```
 4. Open the browser at localhost:3000

@@ -59,15 +59,11 @@
 
     #title {
       @include v-center;
+      @include header-button;
 
       font-size: $header-font-size;
       letter-spacing: 2px;
 
-      cursor: pointer;
-
-      &:hover {
-        color: darken($secondary-color, 10);
-      }
     }
 
     .options {
@@ -77,20 +73,8 @@
 
       right: $h-padding;
 
-      #login {
-        cursor: pointer;
-
-        &:hover {
-          color: darken($secondary-color, 10);
-        }
-      }
-
-      #logout {
-        cursor: pointer;
-
-        &:hover {
-          color: darken($secondary-color, 10);
-        }
+      #login, #logout {
+        @include header-button;
       }
     }
   }

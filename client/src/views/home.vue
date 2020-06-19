@@ -92,9 +92,14 @@
 <style lang='scss' scoped>
   @import '../styles/global';
 
+  @mixin home-inputs {
+    @include form-element;
+    margin-bottom: 0px;
+  }
+
   .home {
     .shorten-introduction {
-      padding: 50px $h-padding;
+      padding: 100px $h-padding;
 
       #description {
         font-size: $font-size-heading;
@@ -112,17 +117,18 @@
         flex-direction: row;
 
         input {
+          @include home-inputs;
+          background-color: white;
+          
           flex: 9 1 auto;
           margin-right: 5px;
           padding: 15px 10px;
-
-          border-radius: 5px;
         }
 
         button {
+          @include home-inputs;
+          
           flex: 1 1 auto;
-
-          border-radius: 5px;
         }
       }
     }
