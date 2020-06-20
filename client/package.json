@@ -38,6 +38,7 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
+    "jsonwebtoken": "^8.5.1",
     "vue": "^2.6.11",
     "vue-router": "^3.3.2"
   }

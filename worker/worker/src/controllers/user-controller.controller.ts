@@ -29,7 +29,7 @@ export class UserControllerController {
     responses: {
       '200': {
         description: 'User model instance',
-        content: {'application/json': {schema: getModelSchemaRef(User)}},
+        content: {'application/json': {schema: getModelSchemaRef(User, { exclude: ['password'] })}},
       },
     },
   })
@@ -42,11 +42,32 @@ export class UserControllerController {
             exclude: ['id'],
           }),
         },
+        // 'application/json': {
+        //   schema: {
+        //     title: 'New User',
+        //     type: 'object',
+        //     properties: {
+        //       username: {
+        //         type: 'string',
+        //         format: 'email',
+        //       },
+        //       password: {
+        //         type: 'string',
+        //         minLength: 8,
+        //         maxLength: 32,
+        //       },
+        //     },
+        //     required: ['username', 'password'],
+        //     additionalProperties: false,
+        //   }
+        // }
       },
     })
     user: Omit<User, 'id'>,
-  ): Promise<User> {
-    return this.userRepository.create(user);
+  ): Promise<Partial<User>> {
+    const newUser = await this.userRepository.create(user);
+    delete newUser.password;
+    return newUser;
   }
 
   @get('/users/count', {

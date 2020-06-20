@@ -15,7 +15,7 @@ export const mongoConfig = {
     user: process.env.MONGO_USER || null,
     password: process.env.MONGO_PASSWORD || null,
     database: process.env.MONGO_DBNAME || "url-shortener",
-    // authSource: process.env.MONGO_AUTHDB || "admin",
+    authSource: process.env.MONGO_AUTHDB || "admin",
     useNewUrlParser: true
 };
 

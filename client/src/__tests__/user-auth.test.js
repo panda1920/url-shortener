@@ -1,10 +1,14 @@
+import jwt from 'jsonwebtoken';
+
 import userAuthMixin from '../mixins/user-auth';
 
 describe('testing behavior of user auth mixin', () => {
-    let originalFetch;
-    const TEST_TOKEN = '123123124124124';
-    const TEST_USERNAME = 'John Doe';
+    const TEST_USERNAME = 'johndoe@example.com';
     const TEST_PASSWORD = 'password';
+    const TEST_TOKEN = jwt.sign(
+        { username: TEST_USERNAME }, 'secret', { expiresIn: '1h' }
+        );
+    let originalFetch;
     const mockFetch = jest.fn()
         .mockName('mocked fetch()')
         .mockImplementation(() => Promise.resolve({
@@ -41,6 +45,13 @@ describe('testing behavior of user auth mixin', () => {
 
         const retrievedToken = window.localStorage.getItem('token');
         expect(retrievedToken).toBe(TEST_TOKEN);
+    });
+
+    test('login should extract token information and store in local storage', async () => {
+        await userAuthMixin.methods.login(TEST_USERNAME, TEST_PASSWORD);
+
+        const username = window.localStorage.getItem('username');
+        expect(username).toBe(TEST_USERNAME);
     });
 
     test('login should reject when api call failed', async () => {

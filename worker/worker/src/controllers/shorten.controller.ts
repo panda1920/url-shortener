@@ -44,6 +44,7 @@ export class ShortenController {
               url: { type: 'string', }
             },
             required: ['url'],
+            additionalProperties: false,
             examples: [{ url: 'www.google.com' }],
           }
         },

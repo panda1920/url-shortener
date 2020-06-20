@@ -7,9 +7,9 @@ services:
     container_name: url-shortener-mongo
     volumes:
       - mongo:/data/db
-    # environment:
-    #   - MONGO_INITDB_ROOT_USERNAME=mongoadmin
-    #   - MONGO_INITDB_ROOT_PASSWORD=password
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongoadmin
+      - MONGO_INITDB_ROOT_PASSWORD=password
     ports:
       - '27017:27017'
 
@@ -29,6 +29,9 @@ services:
     environment:
       - MONGO_HOST=mongo
       - REDIS_HOST=redis
+      - MONGO_USER=mongoadmin
+      - MONGO_PASSWORD=password
+      - MONGO_AUTHDB=admin
     ports:
       - '3000:3000'
     depends_on:

@@ -16,7 +16,7 @@ export class UserRepository extends DefaultCrudRepository<
     super(User, dataSource);
   }
 
-  create(entity: DataObject<User>, options?: Options): Promise<User> {
+  async create(entity: DataObject<User>, options?: Options): Promise<User> {
     entity.id = v4();
     return super.create(entity, options);
   }

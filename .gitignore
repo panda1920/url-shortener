@@ -9,3 +9,6 @@ dist/
 
 # ignore sample app
 worker/sample/*
+
+# ignore test code
+playground/
