@@ -9,6 +9,11 @@ import {RestApplication} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import {MySequence} from './sequence';
+import { BindingScope } from '@loopback/context';
+
+import * as mybindings from './mybindings';
+import MyUserService from './services/user.service';
+import JwtService from './services/jwt.service';
 
 export {ApplicationConfig};
 
@@ -30,6 +35,8 @@ export class WorkerApplication extends BootMixin(
     });
     this.component(RestExplorerComponent);
 
+    this.setBindings();
+
     this.projectRoot = __dirname;
     // Customize @loopback/boot Booter Conventions here
     this.bootOptions = {
@@ -40,5 +47,19 @@ export class WorkerApplication extends BootMixin(
         nested: true,
       },
     };
+  }
+
+  setBindings() {
+    this.bind(mybindings.USER_SERVICE)
+      .toClass(MyUserService)
+      .inScope(BindingScope.SINGLETON);
+    this.bind(mybindings.JWT_SERVICE)
+      .toClass(JwtService)
+      .inScope(BindingScope.SINGLETON);
+
+    const secret = process.env.TOKEN_SECRET || 'secret';
+    const expire = process.env.TOKEN_EXPRES_IN || '1h';
+    this.bind(mybindings.TOKEN_SECRET).to(secret);
+    this.bind(mybindings.TOKEN_EXPIRES_IN).to(expire);
   }
 }

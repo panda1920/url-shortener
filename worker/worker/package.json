@@ -39,6 +39,7 @@
     "!*/__tests__"
   ],
   "dependencies": {
+    "@loopback/authentication": "^4.2.7",
     "@loopback/boot": "^2.3.3",
     "@loopback/context": "^3.4.0",
     "@loopback/core": "^2.8.0",
@@ -47,7 +48,9 @@
     "@loopback/rest": "^5.1.1",
     "@loopback/rest-explorer": "^2.0.4",
     "@loopback/service-proxy": "^2.0.4",
+    "@types/jsonwebtoken": "^8.5.0",
     "@types/uuid": "^8.0.0",
+    "jsonwebtoken": "^8.5.1",
     "loopback-connector-kv-redis": "^3.0.3",
     "loopback-connector-mongodb": "^4.2.0",
     "tslib": "^1.10.0",

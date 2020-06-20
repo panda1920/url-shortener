@@ -18,11 +18,22 @@ import {
 } from '@loopback/rest';
 import {User} from '../models';
 import {UserRepository} from '../repositories';
+import { inject } from '@loopback/context';
+
+import * as mybindings from '../mybindings';
+import { UserCredential, Token } from '../types';
+import MyUserService from '../services/user.service';
+import JwtService from '../services/jwt.service';
+import { loginResponseSpec, loginRequestBodySpec, refreshResponseSpec } from './specs/request-reqponse';
 
 export class UserControllerController {
   constructor(
     @repository(UserRepository)
     public userRepository : UserRepository,
+    @inject(mybindings.USER_SERVICE)
+    public userService: MyUserService,
+    @inject(mybindings.JWT_SERVICE)
+    public jwtService: JwtService
   ) {}
 
   @post('/users', {
@@ -42,25 +53,6 @@ export class UserControllerController {
             exclude: ['id'],
           }),
         },
-        // 'application/json': {
-        //   schema: {
-        //     title: 'New User',
-        //     type: 'object',
-        //     properties: {
-        //       username: {
-        //         type: 'string',
-        //         format: 'email',
-        //       },
-        //       password: {
-        //         type: 'string',
-        //         minLength: 8,
-        //         maxLength: 32,
-        //       },
-        //     },
-        //     required: ['username', 'password'],
-        //     additionalProperties: false,
-        //   }
-        // }
       },
     })
     user: Omit<User, 'id'>,
@@ -190,5 +182,27 @@ export class UserControllerController {
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
     await this.userRepository.deleteById(id);
+  }
+
+  @post('/users/login', { responses: loginResponseSpec })
+  async login(
+    @requestBody(loginRequestBodySpec) credentials: UserCredential
+  ): Promise<Token> {
+    const user = await this.userService.verifyCredentials(credentials);
+    const profile = this.userService.convertToUserProfile(user);
+    const token = await this.jwtService.generateToken(profile);
+
+    return { token };
+  }
+
+  @get('/users/refresh', { responses: refreshResponseSpec })
+  async refresh(
+    @param.header.string('Authorization') authHeader: string
+  ): Promise<Token> {
+    const token = authHeader.replace(/Bearer\s*/, '');
+    const profile = await this.jwtService.verifyToken(token);
+    const newToken = await this.jwtService.generateToken(profile);
+
+    return { token: newToken };
   }
 }

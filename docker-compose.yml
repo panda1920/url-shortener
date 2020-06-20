@@ -33,7 +33,7 @@ services:
       - MONGO_PASSWORD=password
       - MONGO_AUTHDB=admin
     ports:
-      - '3000:3000'
+      - '3001:3000'
     depends_on:
       - mongo
       - redis
