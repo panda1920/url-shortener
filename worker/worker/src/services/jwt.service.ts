@@ -10,7 +10,7 @@ import * as mybindings from '../mybindings';
 class JwtService implements TokenService {
   constructor(
     @inject(mybindings.TOKEN_SECRET) private secret: string,
-    @inject(mybindings.TOKEN_EXPIRES_IN) private expresIn: string,
+    @inject(mybindings.TOKEN_EXPIRES_IN) private expiresIn: string,
   ) {}
 
   async verifyToken(token: string): Promise<UserProfile> {
@@ -18,7 +18,7 @@ class JwtService implements TokenService {
       const decoded = jwt.verify(token, this.secret) as UserProfile;
       const profile = Object.assign(
         { [securityId]: '', },
-        { username: decoded.username }
+        { username: decoded.username, id: decoded.id }
       );
       return profile;
     }
@@ -28,8 +28,8 @@ class JwtService implements TokenService {
   }
 
   async generateToken(profile: UserProfile): Promise<string> {
-    const { username, } = profile;
-    return  jwt.sign({ username }, this.secret, { expiresIn: this.expresIn });
+    const { username, id } = profile;
+    return  jwt.sign({ username, id }, this.secret, { expiresIn: this.expiresIn });
   }
 }
 

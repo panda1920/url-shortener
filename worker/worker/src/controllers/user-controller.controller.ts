@@ -19,21 +19,27 @@ import {
 import {User} from '../models';
 import {UserRepository} from '../repositories';
 import { inject } from '@loopback/context';
+import { TokenService, UserService, authenticate, AuthenticationBindings } from '@loopback/authentication';
+import { UserProfile } from '@loopback/security';
 
 import * as mybindings from '../mybindings';
 import { UserCredential, Token } from '../types';
-import MyUserService from '../services/user.service';
-import JwtService from '../services/jwt.service';
-import { loginResponseSpec, loginRequestBodySpec, refreshResponseSpec } from './specs/request-reqponse';
+import {
+  loginResponseSpec,
+  loginRequestBodySpec,
+  refreshResponseSpec
+} from './specs/request-reqponse';
 
 export class UserControllerController {
   constructor(
     @repository(UserRepository)
     public userRepository : UserRepository,
     @inject(mybindings.USER_SERVICE)
-    public userService: MyUserService,
-    @inject(mybindings.JWT_SERVICE)
-    public jwtService: JwtService
+    public userService: UserService<User, UserCredential>,
+    @inject(mybindings.TOKEN_SERVICE)
+    public jwtService: TokenService,
+    @inject(AuthenticationBindings.CURRENT_USER, { optional: true })
+    public currentProfile: UserProfile
   ) {}
 
   @post('/users', {
@@ -62,6 +68,7 @@ export class UserControllerController {
     return newUser;
   }
 
+  @authenticate('jwt')
   @get('/users/count', {
     responses: {
       '200': {
@@ -73,6 +80,7 @@ export class UserControllerController {
   async count(
     @param.where(User) where?: Where<User>,
   ): Promise<Count> {
+    console.log(this.currentProfile);
     return this.userRepository.count(where);
   }
 
@@ -186,23 +194,20 @@ export class UserControllerController {
 
   @post('/users/login', { responses: loginResponseSpec })
   async login(
-    @requestBody(loginRequestBodySpec) credentials: UserCredential
+    @requestBody(loginRequestBodySpec) credential: UserCredential
   ): Promise<Token> {
-    const user = await this.userService.verifyCredentials(credentials);
+    const user = await this.userService.verifyCredentials(credential);
     const profile = this.userService.convertToUserProfile(user);
     const token = await this.jwtService.generateToken(profile);
 
     return { token };
   }
 
+  @authenticate('jwt')
   @get('/users/refresh', { responses: refreshResponseSpec })
-  async refresh(
-    @param.header.string('Authorization') authHeader: string
-  ): Promise<Token> {
-    const token = authHeader.replace(/Bearer\s*/, '');
-    const profile = await this.jwtService.verifyToken(token);
-    const newToken = await this.jwtService.generateToken(profile);
+  async refresh(): Promise<Token> {
+    const token = await this.jwtService.generateToken(this.currentProfile);
 
-    return { token: newToken };
+    return { token };
   }
 }

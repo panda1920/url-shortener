@@ -1,10 +1,14 @@
 import { BindingKey } from "@loopback/context";
+import {
+  UserService,
+  TokenService,
+} from '@loopback/authentication';
 
-import MyUserService from './services/user.service';
-import JwtService from './services/jwt.service';
+import { User } from './models';
+import { UserCredential } from './types';
 
-export const USER_SERVICE = BindingKey.create<MyUserService>('services.user.service');
-export const JWT_SERVICE = BindingKey.create<JwtService>('services.jwt.service');
+export const USER_SERVICE = BindingKey.create<UserService<User, UserCredential>>('services.user.service');
+export const TOKEN_SERVICE = BindingKey.create<TokenService>('services.token.service');
 
 export const TOKEN_SECRET = BindingKey.create<string>('token.secret');
 export const TOKEN_EXPIRES_IN = BindingKey.create<string>('token.expires.in');

@@ -10,10 +10,16 @@ import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import {MySequence} from './sequence';
 import { BindingScope } from '@loopback/context';
+import {
+  AuthenticationComponent,
+  AuthenticationBindings,
+  registerAuthenticationStrategy,
+} from '@loopback/authentication';
 
 import * as mybindings from './mybindings';
 import MyUserService from './services/user.service';
 import JwtService from './services/jwt.service';
+import JwtStrategy from './auth-strategy/jwt.strategy';
 
 export {ApplicationConfig};
 
@@ -35,6 +41,10 @@ export class WorkerApplication extends BootMixin(
     });
     this.component(RestExplorerComponent);
 
+    // add authenticaiton
+    this.component(AuthenticationComponent);
+    registerAuthenticationStrategy(this, JwtStrategy);
+
     this.setBindings();
 
     this.projectRoot = __dirname;
@@ -53,7 +63,7 @@ export class WorkerApplication extends BootMixin(
     this.bind(mybindings.USER_SERVICE)
       .toClass(MyUserService)
       .inScope(BindingScope.SINGLETON);
-    this.bind(mybindings.JWT_SERVICE)
+    this.bind(mybindings.TOKEN_SERVICE)
       .toClass(JwtService)
       .inScope(BindingScope.SINGLETON);
 

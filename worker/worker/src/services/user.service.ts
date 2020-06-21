@@ -25,8 +25,9 @@ class MyUserService implements UserService<User, UserCredential> {
 
   convertToUserProfile(user: User): UserProfile {
     return {
-      [securityId]: user.id,
+      [securityId]: '',
       username: user.username,
+      id: user.id
     };
   }
 }
