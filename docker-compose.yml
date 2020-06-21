@@ -38,6 +38,17 @@ services:
       - mongo
       - redis
 
+  client:
+    image: panda1920/url-shortener-client:latest
+    build:
+      context: ./client
+    container_name: url-shortener-client
+    # environment:
+    ports:
+      - '8888:80'
+    depends_on:
+      - worker
+
 volumes:
   mongo:
     name: url-shortener.mongo.data

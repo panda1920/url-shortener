@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-const apiRoot = process.env.API_USER_PATH || 'default.example.com';
+const apiRoot = process.env.API_USER_PATH || '/api';
 const apiPath = apiRoot + '/users';
 
 const userAuthMixin = {
@@ -16,12 +16,19 @@ const userAuthMixin = {
         },
 
         async logout() {
-            window.localStorage.removeItem('token');
-            window.localStorage.removeItem('username');
+            purgeAuthInfo();
         },
 
         async refresh() {
-            console.log('refresh');
+            const response = await requestNewToken();
+
+            if (response.ok) {
+                const { token } = await response.json();
+                storeToken(token);
+            }
+            else {
+                purgeAuthInfo();
+            }
         },
 
         getUsername() {
@@ -46,11 +53,27 @@ async function sendLoginRequest(username, password) {
     });
 }
 
+async function requestNewToken() {
+    const token = window.localStorage.getItem('token');
+    if (!token)
+        throw 'You are not logged in';
+
+    return window.fetch(apiPath + '/refresh', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    });
+}
+
 function storeToken(token) {
     const { username } = jwt.decode(token);
 
     window.localStorage.setItem('token', token);
     window.localStorage.setItem('username', username);
+}
+
+function purgeAuthInfo() {
+    window.localStorage.removeItem('token');
+    window.localStorage.removeItem('username');
 }
 
 export default userAuthMixin;

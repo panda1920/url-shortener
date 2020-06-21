@@ -13,4 +13,4 @@ Attempt to recreate a url-shortener app from scratch.
 ```
 docker-compose up -d
 ```
-4. Open the browser at localhost:3000
+4. Open the browser at localhost:8888

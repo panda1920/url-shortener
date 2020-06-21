@@ -7,6 +7,7 @@
     "test": "jest --ci",
     "test:w": "jest --watch",
     "build": "webpack --env.NODE_ENV=production --config ./build/webpack.config.js",
+    "build:docker": "docker image build --no-cache --pull -t panda1920/url-shortener-client:latest .",
     "dev": "webpack-dev-server --env.NODE_ENV=development --config ./build/webpack.config.js"
   },
   "keywords": [],
