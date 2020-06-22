@@ -21,13 +21,22 @@ const userAuthMixin = {
 
         async refresh() {
             const response = await requestNewToken();
+            if (response === null)
+                return;
 
             if (response.ok) {
                 const { token } = await response.json();
                 storeToken(token);
+                retryRefresh(process.env.TOKEN_REFRESH_INTERVAL);
+                return;
+            }
+
+            // errors
+            if (response.status === 401) {
+                purgeAuthInfo();
             }
             else {
-                purgeAuthInfo();
+                retryRefresh(30);
             }
         },
 
@@ -56,7 +65,7 @@ async function sendLoginRequest(username, password) {
 async function requestNewToken() {
     const token = window.localStorage.getItem('token');
     if (!token)
-        throw 'You are not logged in';
+        return null;
 
     return window.fetch(apiPath + '/refresh', {
         method: 'GET',
@@ -74,6 +83,10 @@ function storeToken(token) {
 function purgeAuthInfo() {
     window.localStorage.removeItem('token');
     window.localStorage.removeItem('username');
+}
+
+function retryRefresh(seconds) {
+    setTimeout(userAuthMixin.methods.refresh, seconds * 1000);
 }
 
 export default userAuthMixin;

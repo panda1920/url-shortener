@@ -29,7 +29,7 @@ class JwtService implements TokenService {
 
   async generateToken(profile: UserProfile): Promise<string> {
     const { username, id } = profile;
-    return  jwt.sign({ username, id }, this.secret, { expiresIn: this.expiresIn });
+    return jwt.sign({ username, id }, this.secret, { expiresIn: this.expiresIn });
   }
 }
 

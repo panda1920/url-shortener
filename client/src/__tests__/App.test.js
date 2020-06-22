@@ -4,48 +4,32 @@ import Router from 'vue-router';
 import App from '@/App.vue';
 import Header from '@/components/Header.vue';
 
-const localVue = createLocalVue();
-localVue.use(Router);
-
-function mountComponent(component, options = {}) {
-    return shallowMount(component, {
-        // data: () => {},
-        propsData: {},
-        stubs: {
-            Header: true,
-            Something: true,
-        },
-        mocks: {},
-        localVue,
-        ...options,
-    });
-}
-
 describe('testing behavior of App component', () => {
     let mountedApp;
+    const localVue = createLocalVue();
+    const mockedRefresh = jest.fn().mockName('mocked refresh()');
+    localVue.use(Router);
+
+    function mountComponent(component, options = {}) {
+        return shallowMount(component, {
+            // data: () => {},
+            propsData: {},
+            stubs: {
+                Header: true,
+                Something: true,
+            },
+            mocks: {},
+            localVue,
+            mixins: [{ methods: { refresh: mockedRefresh } }],
+            ...options,
+        });
+    }
 
     beforeEach(() => {
         mountedApp = mountComponent(App);
     });
-
-    test.skip('title should be displayed', () => {
-        expect(mountedApp.html()).toContain('This is a url-shortener App!');
-    });
-
-    test.skip('button should be displayed', () => {
-        // get() will throw if element/component does not exist
-        expect(() => mountedApp.get('button')).not.toThrow();
-    });
-
-    test.skip('clicking on button should increment counter', async () => {
-        const counterValue = mountedApp.get('#count');
-        const button = mountedApp.get('button');
-        
-        expect(counterValue.text()).toBe('0');
-
-        await button.trigger('click');
-
-        expect(counterValue.text()).toBe('1');
+    afterEach(() => {
+        mockedRefresh.mockClear();
     });
 
     test('header component should be displayed', () => {
@@ -74,7 +58,7 @@ describe('testing behavior of App component', () => {
         });
     });
 
-    test.skip('app should go fetch new token when it mounts', () => {
-
+    test('app should refresh token when it mounts', () => {
+        expect(mockedRefresh).toHaveBeenCalledTimes(1);
     }); 
 });

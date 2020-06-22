@@ -14,9 +14,12 @@
 
 <script>
   import Header from '@/components/header';
+  import userAuthMixin from '@/mixins/user-auth';
 
   export default {
     components: { Header },
+
+    mixins: [userAuthMixin],
 
     data: () => ({
       counter: 0,
@@ -27,11 +30,16 @@
       },
     }),
 
+    created() {
+      this.refresh();
+    },
+
     methods: {
       increment() {
         this.counter++;
         console.log(process.env.NODE_ENV);
         console.log(process.env.API_PATH);
+        console.log(process.env.TOKEN_REFRESH_INTERVAL);
       },
       clearLoginInfo() {
         this.loginInfo.token = '';

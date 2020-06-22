@@ -16,6 +16,8 @@ describe('testing behavior of user auth mixin', () => {
             status: 200,
             json: () => Promise.resolve({ token: TEST_TOKEN }),
         }));
+    process.env.API_PATH = '/api';
+    process.env.TOKEN_REFRESH_INTERVAL = 3000;
 
     beforeEach(() => {
         originalFetch = window.fetch;
@@ -96,8 +98,18 @@ describe('testing behavior of user auth mixin', () => {
     describe('refresh logic', () => {
         const refresh = userAuthMixin.methods.refresh;
 
-        test('refresh should reject when no token in local storage', async () => {
-            await expect(refresh()).rejects.toEqual(expect.any(String));
+        beforeEach(() => {
+            jest.useFakeTimers();
+        });
+        afterEach(() => {
+            jest.clearAllTimers();
+            jest.useRealTimers();
+        });
+
+        test('refresh should not make api call when no token', async () => {
+            await refresh();
+
+            expect(mockFetch).toHaveBeenCalledTimes(0);
         });
 
         test('refresh should send token as auth header to refresh api', async () => {
@@ -142,7 +154,7 @@ describe('testing behavior of user auth mixin', () => {
             expect(window.localStorage.getItem('username')).toBeFalsy();
         });
 
-        test.skip('if refresh fails by some other reason, registers another refresh 30 seconds from now', async () => {
+        test('if refresh fails by some other reason, registers another refresh 30 seconds from now', async () => {
             const sendToken = '1231293120312312';
             window.localStorage.setItem('token', sendToken);
             window.localStorage.setItem('username', TEST_USERNAME);
@@ -152,15 +164,39 @@ describe('testing behavior of user auth mixin', () => {
                 ok: false,
                 status: 504,
             }));
+            const timeout = jest.spyOn(window, 'setTimeout');
 
             await refresh();
+
+            expect(timeout).toHaveBeenCalledTimes(1);
+            const [_, mseconds] = timeout.mock.calls[0];
+            expect(mseconds).toBe(30000);
+
+            jest.runOnlyPendingTimers();
+
+            expect(window.fetch).toHaveBeenCalledTimes(2);
+            expect(window.fetch).toHaveBeenLastCalledWith(
+                '/api/users/refresh', expect.anything()
+            );
         });
 
-        test.skip('if refresh succeeds, registers another refresh 50 minutes from now', async () => {
+        test('if refresh succeeds, registers another refresh 50 minutes from now', async () => {
             const sendToken = '1231293120312312';
             window.localStorage.setItem('token', sendToken);
+            const timeout = jest.spyOn(window, 'setTimeout');
 
             await refresh();
+
+            expect(timeout).toHaveBeenCalledTimes(1);
+            const [_, mseconds] = timeout.mock.calls[0];
+            expect(mseconds).toBe(50 * 60 * 1000);
+
+            jest.runOnlyPendingTimers();
+
+            expect(window.fetch).toHaveBeenCalledTimes(2);
+            expect(window.fetch).toHaveBeenLastCalledWith(
+                '/api/users/refresh', expect.anything()
+            );
         });
     });
 });
