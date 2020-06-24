@@ -7,8 +7,8 @@ import Header from '@/components/Header.vue';
 describe('testing behavior of App component', () => {
     let mountedApp;
     const localVue = createLocalVue();
-    const mockedRefresh = jest.fn().mockName('mocked refresh()');
     localVue.use(Router);
+    const mockedRefresh = jest.fn().mockName('mocked refresh()');
 
     function mountComponent(component, options = {}) {
         return shallowMount(component, {

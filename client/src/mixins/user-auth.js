@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-const apiRoot = process.env.API_USER_PATH || '/api';
+const apiRoot = process.env.API_PATH || '/api';
 const apiPath = apiRoot + '/users';
 
 const userAuthMixin = {
@@ -31,7 +31,7 @@ const userAuthMixin = {
                 return;
             }
 
-            // errors
+            // when refresh fails
             if (response.status === 401) {
                 purgeAuthInfo();
             }

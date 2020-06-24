@@ -15,9 +15,12 @@ import {
   put,
   del,
   requestBody,
+  RestBindings,
+  Response
 } from '@loopback/rest';
 import {UrlMappingToShort} from '../models';
 import {UrlMappingToShortMongoRepository} from '../repositories';
+import { inject } from '@loopback/context';
 
 export class ShortenController {
   constructor(
@@ -175,5 +178,17 @@ export class ShortenController {
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
     await this.urlMappingToShortMongoRepository.deleteById(id);
+  }
+
+  @get('/shorten/url/{shortened}', {
+    responses: { '301': { description: 'Redirecting provided path to real url' } }
+  })
+  async redirect(
+    @inject(RestBindings.Http.RESPONSE) response: Response,
+    @param.path.string('shortened') shortened: string,
+  ) {
+    console.log(shortened);
+    // response.redirect('https://www.google.com');
+    response.redirect('http://localhost:8888/error');
   }
 }

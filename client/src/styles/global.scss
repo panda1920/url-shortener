@@ -38,7 +38,6 @@ $vertical-space-medium: 32px;
     margin-bottom: $vertical-space-small;
     
     border-radius: 5px;
-    border-color: lighten($primary-color, 20%);
 
     &:focus {
         border-color: $secondary-color;

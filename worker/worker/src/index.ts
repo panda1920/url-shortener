@@ -32,8 +32,29 @@ if (require.main === module) {
       },
     },
   };
-  main(config).catch(err => {
-    console.error('Cannot start the application.', err);
-    process.exit(1);
-  });
+
+  // prevent main thread failing when backend DB is not yet online
+  const START_ATTEMPT_TIMES = 10;
+  const START_ATTEMPT_INTERVAL = 5;
+
+  async function startMain(iterateTimes: number): Promise<void> {
+    if (iterateTimes <= 0) {
+      console.error('Cannot start the application');
+      process.exit(1);
+    }
+
+    try {
+      await main(config);
+    }
+    catch(err) {
+      console.log(`Failed to start appication; restarting in ${START_ATTEMPT_INTERVAL}s`);
+      setTimeout(() => startMain(iterateTimes - 1), START_ATTEMPT_INTERVAL * 1000);
+    }
+  }
+
+  startMain(START_ATTEMPT_TIMES);
+  // main(config).catch(err => {
+  //   console.error('Cannot start the application.', err);
+  //   process.exit(1);
+  // });
 }

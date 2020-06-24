@@ -7,7 +7,7 @@ describe('testing behavior of user auth mixin', () => {
     const TEST_PASSWORD = 'password';
     const TEST_TOKEN = jwt.sign(
         { username: TEST_USERNAME }, 'secret', { expiresIn: '1h' }
-        );
+    );
     let originalFetch;
     const mockFetch = jest.fn()
         .mockName('mocked fetch()')
@@ -15,7 +15,8 @@ describe('testing behavior of user auth mixin', () => {
             ok: true,
             status: 200,
             json: () => Promise.resolve({ token: TEST_TOKEN }),
-        }));
+        })
+    );
     process.env.API_PATH = '/api';
     process.env.TOKEN_REFRESH_INTERVAL = 3000;
 

@@ -8,6 +8,10 @@
     <!-- <div id='count'>
       {{ counter }}
     </div> -->
+    <button @click='testAPI'>
+      Test API
+    </button>
+    HELLO WORLD!
     <router-view></router-view>
   </div>
 </template>
@@ -45,6 +49,11 @@
         this.loginInfo.token = '';
         this.loginInfo.username = '';
       },
+      async testAPI() {
+        const response = await window.fetch('/api/users', { method: 'GET' });
+        const json = await response.json();
+        console.log(json);
+      },
     },
   };
 </script>
@@ -68,12 +77,17 @@
     outline: none;
     appearance: none;
     box-shadow: none;
-    border: 1px solid $primary-color;
+    border: 1px solid;
+  }
+
+  input {
+    border-color: lighten($primary-color, 20%);
   }
 
   button {
     cursor: pointer;
     background-color: $secondary-color;
+    border-color: $secondary-color;
   }
 
 </style>

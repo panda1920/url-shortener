@@ -38,9 +38,6 @@
         if (this.$route.path !== '/')
           await this.$router.push('/');
       },
-      logout() {
-        this.clearLoginInfo();
-      },
     }
   };
 </script>
