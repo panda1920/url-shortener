@@ -37,8 +37,10 @@ describe('testing behavior of Header component', () => {
             mixins: [
                 {
                     methods: {
-                        isAuthenticated,
                         logout: logout || mockLogout
+                    },
+                    computed: {
+                        isAuthenticated
                     }
                 },
             ],

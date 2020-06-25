@@ -35,6 +35,7 @@
     }),
 
     created() {
+      this.restore();
       this.refresh();
     },
 

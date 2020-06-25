@@ -9,6 +9,7 @@ describe('testing behavior of App component', () => {
     const localVue = createLocalVue();
     localVue.use(Router);
     const mockedRefresh = jest.fn().mockName('mocked refresh()');
+    const mockedRestore = jest.fn().mockName('mocked restore()');
 
     function mountComponent(component, options = {}) {
         return shallowMount(component, {
@@ -20,7 +21,7 @@ describe('testing behavior of App component', () => {
             },
             mocks: {},
             localVue,
-            mixins: [{ methods: { refresh: mockedRefresh } }],
+            mixins: [{ methods: { refresh: mockedRefresh, restore: mockedRestore } }],
             ...options,
         });
     }
@@ -30,6 +31,7 @@ describe('testing behavior of App component', () => {
     });
     afterEach(() => {
         mockedRefresh.mockClear();
+        mockedRestore.mockClear();
     });
 
     test('header component should be displayed', () => {
@@ -57,6 +59,10 @@ describe('testing behavior of App component', () => {
             expect(stubHeader.vm.$props.clearLoginInfo).toBe(mountedApp.vm.clearLoginInfo);
         });
     });
+
+    test('app should restore persist info when it mounts', () => {
+        expect(mockedRestore).toHaveBeenCalledTimes(1);
+    }); 
 
     test('app should refresh token when it mounts', () => {
         expect(mockedRefresh).toHaveBeenCalledTimes(1);

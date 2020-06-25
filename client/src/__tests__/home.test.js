@@ -30,7 +30,7 @@ describe('testing behavior of Home component', () => {
         const isAuthenticated = () => (loggedIn === false) ? false : true;
 
         return shallowMount(Home, {
-            mixins: [{ methods: { isAuthenticated } }],
+            mixins: [{ computed: { isAuthenticated } }],
         });
     }
 

@@ -3,64 +3,82 @@ import jwt from 'jsonwebtoken';
 import userAuthMixin from '../mixins/user-auth';
 
 describe('testing behavior of user auth mixin', () => {
-    const TEST_USERNAME = 'johndoe@example.com';
-    const TEST_PASSWORD = 'password';
-    const TEST_TOKEN = jwt.sign(
-        { username: TEST_USERNAME }, 'secret', { expiresIn: '1h' }
-    );
+    const TEST_DATA = {
+        USERNAME: 'johndoe@example.com',
+        PASSWORD: 'password',
+        RETURN_TOKEN: jwt.sign(
+            { username: 'johndoe@example.com' }, 'secret', { expiresIn: '1h' }
+        ),
+        SEND_TOKEN: 'some_random_token',
+    };
+    
+    const MOCKS = {
+        fetch: jest.fn()
+            .mockName('mocked fetch()')
+            .mockImplementation(() => Promise.resolve({
+                ok: true,
+                status: 200,
+                json: () => Promise.resolve({ token: TEST_DATA.RETURN_TOKEN }),
+            })
+        ),
+        $store: {
+            commit: jest.fn().mockName('mocked store commit()'),
+            dispatch: jest.fn().mockName('mocked store dispatch()'),
+            getters: { token: TEST_DATA.SEND_TOKEN },
+        }
+    };
+
+    const TEST_ENVS = {
+        API_PATH: '/test_api',
+        TOKEN_REFRESH_INTERVAL: 3000,
+    };
+
     let originalFetch;
-    const mockFetch = jest.fn()
-        .mockName('mocked fetch()')
-        .mockImplementation(() => Promise.resolve({
-            ok: true,
-            status: 200,
-            json: () => Promise.resolve({ token: TEST_TOKEN }),
-        })
-    );
-    process.env.API_PATH = '/api';
-    process.env.TOKEN_REFRESH_INTERVAL = 3000;
+    let originalEnvs;
 
     beforeEach(() => {
         originalFetch = window.fetch;
-        window.fetch = mockFetch;
+        originalEnvs = process.env;
+        window.fetch = MOCKS.fetch;
+        process.env = { ...TEST_ENVS };
     });
     afterEach(() => {
         window.fetch = originalFetch;
+        process.env = originalEnvs;
+
         window.localStorage.clear();
-        mockFetch.mockClear();
+        MOCKS.fetch.mockClear();
+        MOCKS.$store.commit.mockClear();
+        MOCKS.$store.dispatch.mockClear();
     });
 
     describe('login logic', () => {
-        const login = userAuthMixin.methods.login;
+        const wrapper = { $store: MOCKS.$store };
+        const login = userAuthMixin.methods.login.bind(wrapper);
 
         test('login should call fetch api', async () => {
-            await login(TEST_USERNAME, TEST_PASSWORD);
+            await login(TEST_DATA.USERNAME, TEST_DATA.PASSWORD);
     
-            expect(mockFetch).toHaveBeenCalledTimes(1);
-            const [url, options] = mockFetch.mock.calls[0];
-            expect(url).toBe('/api/users/login');
+            expect(MOCKS.fetch).toHaveBeenCalledTimes(1);
+            const [url, options] = MOCKS.fetch.mock.calls[0];
+            expect(url).toBe(process.env.API_PATH + '/users/login');
             expect(options.method).toBe('POST');
             expect(options.headers).toMatchObject({ 'Content-Type': 'application/json' });
             expect(JSON.parse(options.body)).toMatchObject({
-                username: TEST_USERNAME,
-                password: TEST_PASSWORD
+                username: TEST_DATA.USERNAME,
+                password: TEST_DATA.PASSWORD
             });
         });
     
-        test('login should insert token into local storage', async () => {
-            await login(TEST_USERNAME, TEST_PASSWORD);
+        test('login should call storeToken on store', async () => {
+            await login(TEST_DATA.USERNAME, TEST_DATA.PASSWORD);
     
-            const retrievedToken = window.localStorage.getItem('token');
-            expect(retrievedToken).toBe(TEST_TOKEN);
+            expect(MOCKS.$store.commit).toHaveBeenCalledTimes(1);
+            const [mutation, payload] = MOCKS.$store.commit.mock.calls[0];
+            expect(mutation).toBe('storeToken');
+            expect(payload).toMatchObject({ token: TEST_DATA.RETURN_TOKEN });
         });
-    
-        test('login should extract token information and store in local storage', async () => {
-            await login(TEST_USERNAME, TEST_PASSWORD);
-    
-            const username = window.localStorage.getItem('username');
-            expect(username).toBe(TEST_USERNAME);
-        });
-    
+
         test('login should reject when api call failed', async () => {
             window.fetch = jest.fn()
             .mockName('mocked fetch()')
@@ -70,34 +88,49 @@ describe('testing behavior of user auth mixin', () => {
             }));
     
             await expect(
-                login(TEST_USERNAME, TEST_PASSWORD)
+                login(TEST_DATA.USERNAME, TEST_DATA.PASSWORD)
             ).rejects.toEqual(expect.any(String));
         });
     });
 
+    describe('logout logic', () => {
+        const wrapper = { $store: MOCKS.$store };
+        const logout = userAuthMixin.methods.logout.bind(wrapper);
 
-    test('logout should clear local storage information', async () => {
-        window.localStorage.setItem('token', TEST_TOKEN);
-        window.localStorage.setItem('username', TEST_USERNAME);
-
-        await userAuthMixin.methods.logout();
-
-        expect(window.localStorage.getItem('token')).toBeFalsy();
-        expect(window.localStorage.getItem('username')).toBeFalsy();
+        test('logout should call purgeToken on store', async () => {
+            await logout();
+            
+            expect(MOCKS.$store.commit).toHaveBeenCalledTimes(1);
+            const [mutation] = MOCKS.$store.commit.mock.calls[0];
+            expect(mutation).toBe('purgeToken');
+        });
     });
 
-    test('isAuthenticated should return false when not logged in', () => {
-        expect(userAuthMixin.methods.isAuthenticated()).toBe(false);
+    describe('isAuthenticated logic', () => {
+        const wrapper = { $store: MOCKS.$store };
+        const isAuthenticated = userAuthMixin.computed.isAuthenticated.bind(wrapper);
+
+        test('isAuthenticated should return false when token not found', () => {
+            const old = wrapper.$store.getters.token;
+            wrapper.$store.getters.token = null;
+
+            expect(isAuthenticated()).toBe(false);
+
+            wrapper.$store.getters.token = old;
+        });
+    
+        test('isAuthenticated should return true when username is present', () => {
+            window.localStorage.setItem('username', TEST_DATA.USERNAME);
+    
+            expect(isAuthenticated()).toBe(true);
+        });
     });
 
-    test('isAuthenticated should return true when username is present', () => {
-        window.localStorage.setItem('username', TEST_USERNAME);
 
-        expect(userAuthMixin.methods.isAuthenticated()).toBe(true);
-    });
 
     describe('refresh logic', () => {
-        const refresh = userAuthMixin.methods.refresh;
+        const wrapper = { $store: MOCKS.$store };
+        let refresh = userAuthMixin.methods.refresh.bind(wrapper);
 
         beforeEach(() => {
             jest.useFakeTimers();
@@ -108,40 +141,39 @@ describe('testing behavior of user auth mixin', () => {
         });
 
         test('refresh should not make api call when no token', async () => {
+            const old = wrapper.$store.getters.token;
+            wrapper.$store.getters.token = null;
+
             await refresh();
 
-            expect(mockFetch).toHaveBeenCalledTimes(0);
+            expect(MOCKS.fetch).toHaveBeenCalledTimes(0);
+
+            wrapper.$store.getters.token = old;
         });
 
         test('refresh should send token as auth header to refresh api', async () => {
-            const sendToken = '1231293120312312';
-            window.localStorage.setItem('token', sendToken);
-
             await refresh();
 
-            expect(mockFetch).toHaveBeenCalledTimes(1);
-            const [url, options] = mockFetch.mock.calls[0];
-            expect(url).toBe('/api/users/refresh');
+            expect(MOCKS.fetch).toHaveBeenCalledTimes(1);
+            const [url, options] = MOCKS.fetch.mock.calls[0];
+            expect(url).toBe(TEST_ENVS.API_PATH + '/users/refresh');
             expect(options.method).toBe('GET');
             expect(options.headers).toMatchObject({
-                Authorization: `Bearer ${sendToken}`,
+                Authorization: `Bearer ${TEST_DATA.SEND_TOKEN}`,
                 'Content-Type': 'application/json',
             });
         });
 
-        test('refresh should store new token in local storage', async () => {
-            const sendToken = '1231293120312312';
-            window.localStorage.setItem('token', sendToken);
-
+        test('refresh should call store token in store', async () => {
             await refresh();
 
-            expect(window.localStorage.getItem('token')).toBe(TEST_TOKEN);
+            expect(MOCKS.$store.commit).toHaveBeenCalledTimes(1);
+            const [mutation, payload] = MOCKS.$store.commit.mock.calls[0];
+            expect(mutation).toBe('storeToken');
+            expect(payload).toMatchObject({ token: TEST_DATA.RETURN_TOKEN });
         });
 
-        test('if refresh to backend fails as unauthorized, purge login information', async () => {
-            const sendToken = '1231293120312312';
-            window.localStorage.setItem('token', sendToken);
-            window.localStorage.setItem('username', TEST_USERNAME);
+        test('if refresh to backend fails as unauthorized, purge token on store', async () => {
             window.fetch = jest.fn()
             .mockName('mocked fetch()')
             .mockImplementation(() => Promise.resolve({
@@ -151,14 +183,12 @@ describe('testing behavior of user auth mixin', () => {
 
             await refresh();
 
-            expect(window.localStorage.getItem('token')).toBeFalsy();
-            expect(window.localStorage.getItem('username')).toBeFalsy();
+            expect(MOCKS.$store.commit).toHaveBeenCalledTimes(1);
+            const [mutation] = MOCKS.$store.commit.mock.calls[0];
+            expect(mutation).toBe('purgeToken');
         });
 
         test('if refresh fails by some other reason, registers another refresh 30 seconds from now', async () => {
-            const sendToken = '1231293120312312';
-            window.localStorage.setItem('token', sendToken);
-            window.localStorage.setItem('username', TEST_USERNAME);
             window.fetch = jest.fn()
             .mockName('mocked fetch()')
             .mockImplementation(() => Promise.resolve({
@@ -177,27 +207,38 @@ describe('testing behavior of user auth mixin', () => {
 
             expect(window.fetch).toHaveBeenCalledTimes(2);
             expect(window.fetch).toHaveBeenLastCalledWith(
-                '/api/users/refresh', expect.anything()
+                TEST_ENVS.API_PATH + '/users/refresh', expect.anything()
             );
         });
 
-        test('if refresh succeeds, registers another refresh 50 minutes from now', async () => {
-            const sendToken = '1231293120312312';
-            window.localStorage.setItem('token', sendToken);
+        test('if refresh succeeds, registers another refresh defined in env', async () => {
             const timeout = jest.spyOn(window, 'setTimeout');
 
             await refresh();
 
             expect(timeout).toHaveBeenCalledTimes(1);
             const [_, mseconds] = timeout.mock.calls[0];
-            expect(mseconds).toBe(50 * 60 * 1000);
+            expect(mseconds).toBe(TEST_ENVS.TOKEN_REFRESH_INTERVAL * 1000);
 
             jest.runOnlyPendingTimers();
 
             expect(window.fetch).toHaveBeenCalledTimes(2);
             expect(window.fetch).toHaveBeenLastCalledWith(
-                '/api/users/refresh', expect.anything()
+                TEST_ENVS.API_PATH + '/users/refresh', expect.anything()
             );
+        });
+    });
+
+    describe('restore logic', () => {
+        const wrapper = { $store: MOCKS.$store };
+        const restore = userAuthMixin.methods.restore.bind(wrapper);
+
+        test('restore calls store to recreate store from persisted info', () => {
+            restore();
+
+            expect(MOCKS.$store.dispatch).toHaveBeenCalledTimes(1);
+            const [action] = MOCKS.$store.dispatch.mock.calls[0];
+            expect(action).toBe('restoreToken');
         });
     });
 });

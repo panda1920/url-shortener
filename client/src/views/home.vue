@@ -46,7 +46,7 @@
       async shorten() {
         this.resetResult();
 
-        if (!this.isAuthenticated()) {
+        if (!this.isAuthenticated) {
           this.error = 'You must be logged in to use our service';
           return;
         }

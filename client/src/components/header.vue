@@ -4,7 +4,7 @@
       URL-SHORTENER
     </p>
     <div class='options'>
-      <div v-if='isAuthenticated()' id='logout' @click='logout'>
+      <div v-if='isAuthenticated' id='logout' @click='logout'>
         LOGOUT
       </div>
       <div v-else id='login' @click='goLogin'>
