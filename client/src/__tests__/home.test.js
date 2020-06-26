@@ -12,17 +12,27 @@ describe('testing behavior of Home component', () => {
             json: () => Promise.resolve({ shortened: returnedShortened }),
         }));
     let originalFetch;
+    let originalEnv;
     let mountedComponent;
+
+    const TEST_ENV = {
+        API_PATH: '/test_api',
+    };
 
     beforeEach(() => {
         mountedComponent = mountHome();
         
         originalFetch = window.fetch;
         window.fetch = mockedFetch;
-        mockedFetch.mockClear();
+        originalEnv = process.env;
+        process.env = { ...TEST_ENV };
+
     });
     afterEach(() => {
+        mockedFetch.mockClear();
+        
         window.fetch = originalFetch;
+        process.env = originalEnv;
     });
 
     function mountHome(customConfig = {}) {
@@ -88,6 +98,20 @@ describe('testing behavior of Home component', () => {
             }).not.toThrow();
             expect(mountedComponent.get('#shortened').html()).toMatch(shortened);
         });
+    
+        test('clipboard button should be displayed when shortened is in state', async () => {
+            expect(() => {
+                mountedComponent.get('#clipboard');
+            }).toThrow();
+    
+            const shortened = 'some-url.com/12312312';
+            mountedComponent.setData({ shortened });
+            await mountedComponent.vm.$nextTick();
+    
+            expect(() => {
+                mountedComponent.get('#clipboard');
+            }).not.toThrow();
+        });
     });
 
     describe('testing logic', () => {
@@ -133,7 +157,8 @@ describe('testing behavior of Home component', () => {
 
             expect(mockedFetch).toHaveBeenCalledTimes(1);
             
-            const [_, options] = mockedFetch.mock.calls[0];
+            const [apiEndpoint, options] = mockedFetch.mock.calls[0];
+            expect(apiEndpoint).toBe(TEST_ENV.API_PATH + '/shorten');
             expect(options.method).toBe('POST');
             expect(options.headers).toMatchObject({ 'Content-Type': 'application/json' });
             expect(JSON.parse(options.body)).toMatchObject({ url });
@@ -147,7 +172,7 @@ describe('testing behavior of Home component', () => {
             // callback to the button is async
             // making api call is async
             // opening json of response is async
-            // therefore need 3 nextTick total (including imlicit one in trigger())
+        // therefore need 3 nextTick total (including imlicit one in trigger())
 
             expect(mountedComponent.vm.$data.shortened).toBe(returnedShortened);
         });
@@ -190,6 +215,21 @@ describe('testing behavior of Home component', () => {
             await mountedComponent.vm.$nextTick();
 
             expect(mountedComponent.vm.$data.shortened).toBe('');
+        });
+
+        test('clicking on button should copy content of shortened to clipboard', async () => {
+            const shortened = 'some_value';
+            const mockedWrite = jest.fn().mockName('mocked writeText()');
+            navigator.clipboard = {
+                writeText: mockedWrite,
+            };
+
+            mountedComponent.setData({ shortened });
+            await mountedComponent.vm.$nextTick();
+            await mountedComponent.get('#clipboard').trigger('click');
+
+            expect(mockedWrite).toHaveBeenCalledTimes(1);
+            expect(mockedWrite).toHaveBeenLastCalledWith(shortened);
         });
     });
 });

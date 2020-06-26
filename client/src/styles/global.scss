@@ -8,6 +8,7 @@ $header-font-size: 20px;
 
 $main-width: 800px;
 $h-padding: calc((100vw - #{$main-width}) / 2);
+$clipboard-width: 52px;
 
 $font-size-normal: 16px;
 $font-size-input: 24px;
@@ -16,12 +17,21 @@ $font-size-heading: 40px;
 $vertical-space-small: 16px;
 $vertical-space-medium: 32px;
 
+$border-radius-element: 5px;
+
 // mixins
 
 @mixin v-center {
     position: absolute;
     top: 50%;
     transform: translate(0, -50%);
+}
+
+@mixin center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 @mixin header-button {
@@ -37,7 +47,7 @@ $vertical-space-medium: 32px;
     padding: 5px;
     margin-bottom: $vertical-space-small;
     
-    border-radius: 5px;
+    border-radius: $border-radius-element;
 
     &:focus {
         border-color: $secondary-color;

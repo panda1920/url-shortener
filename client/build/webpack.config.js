@@ -1,11 +1,11 @@
 const path = require('path');
-const webpack = require('webpack');
 
+const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
-const config = require('./env');
+const configs = require('./env');
 
 const projectRoot = path.dirname(__dirname);
 
@@ -13,6 +13,7 @@ module.exports = env => {
     const isProduction = env.NODE_ENV === 'production';
     const mode = isProduction ? 'production' : 'development';
     const devtool = isProduction ? false : '#eval-source-map';
+    const config = configs[mode];
 
     return {
         mode,

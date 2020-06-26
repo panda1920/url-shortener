@@ -28,23 +28,23 @@ describe('testing behavior of user auth mixin', () => {
         }
     };
 
-    const TEST_ENVS = {
+    const TEST_ENV = {
         API_PATH: '/test_api',
         TOKEN_REFRESH_INTERVAL: 3000,
     };
 
     let originalFetch;
-    let originalEnvs;
+    let originalEnv;
 
     beforeEach(() => {
         originalFetch = window.fetch;
-        originalEnvs = process.env;
+        originalEnv = process.env;
         window.fetch = MOCKS.fetch;
-        process.env = { ...TEST_ENVS };
+        process.env = { ...TEST_ENV };
     });
     afterEach(() => {
         window.fetch = originalFetch;
-        process.env = originalEnvs;
+        process.env = originalEnv;
 
         window.localStorage.clear();
         MOCKS.fetch.mockClear();
@@ -126,8 +126,6 @@ describe('testing behavior of user auth mixin', () => {
         });
     });
 
-
-
     describe('refresh logic', () => {
         const wrapper = { $store: MOCKS.$store };
         let refresh = userAuthMixin.methods.refresh.bind(wrapper);
@@ -156,7 +154,7 @@ describe('testing behavior of user auth mixin', () => {
 
             expect(MOCKS.fetch).toHaveBeenCalledTimes(1);
             const [url, options] = MOCKS.fetch.mock.calls[0];
-            expect(url).toBe(TEST_ENVS.API_PATH + '/users/refresh');
+            expect(url).toBe(TEST_ENV.API_PATH + '/users/refresh');
             expect(options.method).toBe('GET');
             expect(options.headers).toMatchObject({
                 Authorization: `Bearer ${TEST_DATA.SEND_TOKEN}`,
@@ -207,7 +205,7 @@ describe('testing behavior of user auth mixin', () => {
 
             expect(window.fetch).toHaveBeenCalledTimes(2);
             expect(window.fetch).toHaveBeenLastCalledWith(
-                TEST_ENVS.API_PATH + '/users/refresh', expect.anything()
+                TEST_ENV.API_PATH + '/users/refresh', expect.anything()
             );
         });
 
@@ -218,13 +216,13 @@ describe('testing behavior of user auth mixin', () => {
 
             expect(timeout).toHaveBeenCalledTimes(1);
             const [_, mseconds] = timeout.mock.calls[0];
-            expect(mseconds).toBe(TEST_ENVS.TOKEN_REFRESH_INTERVAL * 1000);
+            expect(mseconds).toBe(TEST_ENV.TOKEN_REFRESH_INTERVAL * 1000);
 
             jest.runOnlyPendingTimers();
 
             expect(window.fetch).toHaveBeenCalledTimes(2);
             expect(window.fetch).toHaveBeenLastCalledWith(
-                TEST_ENVS.API_PATH + '/users/refresh', expect.anything()
+                TEST_ENV.API_PATH + '/users/refresh', expect.anything()
             );
         });
     });

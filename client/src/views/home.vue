@@ -8,6 +8,12 @@
         {{ instruction }}
       </div>
     </div>
+    <button ref='shorten' @click='toggleShorten'>
+      Shorten
+    </button>
+    <button ref='error' @click='toggleError'>
+      Error
+    </button>
 
     <div class='shorten-main'>
       <div class='shorten-input'>
@@ -16,11 +22,16 @@
           Shorten
         </button>
       </div>
+      <div v-if='shortened' class='shorten-output'>
+        <div id='shortened'>
+          {{ shortened }}
+        </div>
+        <div id='clipboard' @click='copyToClipboard'>
+          <i class='fas fa-clipboard fa-2x'></i>
+        </div>
+      </div>
       <div v-if='error' id='error'>
         {{ error }}
-      </div>
-      <div v-if='shortened' id='shortened'>
-        {{ shortened }}
       </div>
     </div>
   </div>
@@ -76,13 +87,24 @@
       },
 
       async sendUrl() {
-        return window.fetch('/some_api', {
+        return window.fetch(process.env.API_PATH + '/shorten', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ url: this.url }),
         });
+      },
+
+      async copyToClipboard() {
+        await navigator.clipboard.writeText(this.shortened);
+      },
+
+      toggleShorten() {
+        this.shortened = this.shortened ? '' : 'www.google.com/?q=helloworld';
+      },
+      toggleError() {
+        this.error = this.error ? '' : 'Something wrong with API';
       }
     },
 
@@ -95,6 +117,7 @@
   @mixin home-inputs {
     @include form-element;
     margin-bottom: 0px;
+    padding: 15px 10px;
   }
 
   .home {
@@ -122,7 +145,6 @@
           
           flex: 9 1 auto;
           margin-right: 5px;
-          padding: 15px 10px;
         }
 
         button {
@@ -130,6 +152,43 @@
           
           flex: 1 1 auto;
         }
+      }
+
+      .shorten-output {
+        display: flex;
+        flex-direction: row;
+        margin-top: $vertical-space-small;
+        
+        #shortened {
+          @include home-inputs;
+          
+          flex: 1 1 auto;
+          background-color: white;
+          border-top-right-radius: 0;
+          border-bottom-right-radius: 0;
+        }
+
+        #clipboard {
+          flex: 0 0 auto;
+          position: relative;
+          width: $clipboard-width;
+          border-top-right-radius: $border-radius-element;
+          border-bottom-right-radius: $border-radius-element;
+
+          color: $primary-color;
+          background-color: lighten($primary-color, 50%);
+
+          cursor: pointer;
+
+          i {
+            @include center;
+          }
+        }
+      }
+
+      #error {
+        color: white;
+        margin-top: $vertical-space-small;
       }
     }
   }
