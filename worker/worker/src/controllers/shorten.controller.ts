@@ -22,10 +22,15 @@ import {UrlMappingToShort} from '../models';
 import {UrlMappingToShortMongoRepository} from '../repositories';
 import { inject } from '@loopback/context';
 
+import * as Mybindings from '../mybindings';
+import { ShortenService } from '../services/shorten.service';
+
 export class ShortenController {
   constructor(
     @repository(UrlMappingToShortMongoRepository)
     public urlMappingToShortMongoRepository : UrlMappingToShortMongoRepository,
+    @inject(Mybindings.SHORTEN_SERVICE)
+    public shortenService: ShortenService,
   ) {}
 
   @post('/shorten', {
@@ -54,8 +59,10 @@ export class ShortenController {
       },
     })
     urlMappingToShort: { url: string; },
-  ): Promise<UrlMappingToShort> {
-    return this.urlMappingToShortMongoRepository.create(urlMappingToShort);
+  ): Promise<{ shortened: string; }> {
+    // return this.urlMappingToShortMongoRepository.create(urlMappingToShort);
+    const shortened = await this.shortenService.shorten(urlMappingToShort.url);
+    return { shortened };
   }
 
   @get('/shorten/count', {
@@ -188,7 +195,8 @@ export class ShortenController {
     @param.path.string('shortened') shortened: string,
   ) {
     console.log(shortened);
-    // response.redirect('https://www.google.com');
-    response.redirect('http://localhost:8888/error');
+    const url = await this.shortenService.expand(shortened);
+    console.log(url);
+    response.redirect('https://www.yahoo.com');
   }
 }

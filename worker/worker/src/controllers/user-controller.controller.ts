@@ -37,7 +37,7 @@ export class UserControllerController {
     @inject(mybindings.USER_SERVICE)
     public userService: UserService<User, UserCredential>,
     @inject(mybindings.TOKEN_SERVICE)
-    public jwtService: TokenService,
+    public tokenService: TokenService,
     @inject(AuthenticationBindings.CURRENT_USER, { optional: true })
     public currentProfile: UserProfile
   ) {}
@@ -62,10 +62,8 @@ export class UserControllerController {
       },
     })
     user: Omit<User, 'id'>,
-  ): Promise<Partial<User>> {
-    const newUser = await this.userRepository.create(user);
-    delete newUser.password;
-    return newUser;
+  ): Promise<User> {
+    return await this.userRepository.create(user);
   }
 
   @authenticate('jwt')
@@ -80,7 +78,6 @@ export class UserControllerController {
   async count(
     @param.where(User) where?: Where<User>,
   ): Promise<Count> {
-    console.log(this.currentProfile);
     return this.userRepository.count(where);
   }
 
@@ -198,7 +195,7 @@ export class UserControllerController {
   ): Promise<Token> {
     const user = await this.userService.verifyCredentials(credential);
     const profile = this.userService.convertToUserProfile(user);
-    const token = await this.jwtService.generateToken(profile);
+    const token = await this.tokenService.generateToken(profile);
 
     return { token };
   }
@@ -206,7 +203,7 @@ export class UserControllerController {
   @authenticate('jwt')
   @get('/users/refresh', { responses: refreshResponseSpec })
   async refresh(): Promise<Token> {
-    const token = await this.jwtService.generateToken(this.currentProfile);
+    const token = await this.tokenService.generateToken(this.currentProfile);
 
     return { token };
   }

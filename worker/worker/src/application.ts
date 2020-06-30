@@ -20,6 +20,7 @@ import * as mybindings from './mybindings';
 import MyUserService from './services/user.service';
 import JwtService from './services/jwt.service';
 import JwtStrategy from './auth-strategy/jwt.strategy';
+import { HashShortenService } from './services/shorten.service';
 
 export {ApplicationConfig};
 
@@ -65,6 +66,9 @@ export class WorkerApplication extends BootMixin(
       .inScope(BindingScope.SINGLETON);
     this.bind(mybindings.TOKEN_SERVICE)
       .toClass(JwtService)
+      .inScope(BindingScope.SINGLETON);
+    this.bind(mybindings.SHORTEN_SERVICE)
+      .toClass(HashShortenService)
       .inScope(BindingScope.SINGLETON);
 
     const secret = process.env.TOKEN_SECRET || 'secret';
