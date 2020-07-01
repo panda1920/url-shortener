@@ -18,7 +18,6 @@ export class UrlMappingToShortMongoRepository extends DefaultCrudRepository<
 
   create(entity: DataObject<UrlMappingToShort>, options?: Options): Promise<UrlMappingToShort> {
     entity.id = v4();
-    entity.shortened = 'some_shortened_url';
     return super.create(entity, options);
   }
 }

@@ -22,9 +22,9 @@
           Shorten
         </button>
       </div>
-      <div v-if='shortened' class='shorten-output'>
-        <div id='shortened'>
-          {{ shortened }}
+      <div v-if='shortUrl' class='shorten-output'>
+        <div id='short-url'>
+          {{ shortUrl }}
         </div>
         <div id='clipboard' @click='copyToClipboard'>
           <i class='fas fa-clipboard fa-2x'></i>
@@ -50,7 +50,7 @@
       instruction: 'Just type in a url and click Shorten!',
       error: '',
       url: '',
-      shortened: '',
+      shortUrl: '',
     }),
 
     methods: {
@@ -69,8 +69,8 @@
 
         const response = await this.sendUrl();
         if (response.ok) {
-          const { shortened } = await response.json();
-          this.shortened = shortened;
+          const { shortUrl } = await response.json();
+          this.shortUrl = shortUrl;
         }
         else {
           this.error = 'Failed to shorten url';
@@ -79,7 +79,7 @@
 
       resetResult() {
         this.error = '';
-        this.shortened = '';
+        this.shortUrl = '';
       },
       
       validateUrl() {
@@ -97,11 +97,11 @@
       },
 
       async copyToClipboard() {
-        await navigator.clipboard.writeText(this.shortened);
+        await navigator.clipboard.writeText(this.shortUrl);
       },
 
       toggleShorten() {
-        this.shortened = this.shortened ? '' : 'www.google.com/?q=helloworld';
+        this.shortUrl = this.shortUrl ? '' : 'www.google.com/?q=helloworld';
       },
       toggleError() {
         this.error = this.error ? '' : 'Something wrong with API';
@@ -159,7 +159,7 @@
         flex-direction: row;
         margin-top: $vertical-space-small;
         
-        #shortened {
+        #short-url {
           @include home-inputs;
           
           flex: 1 1 auto;

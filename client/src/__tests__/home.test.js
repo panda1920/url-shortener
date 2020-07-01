@@ -3,13 +3,13 @@ import { shallowMount } from '@vue/test-utils';
 import Home from '@/views/home.vue';
 
 describe('testing behavior of Home component', () => {
-    const returnedShortened = 'www.some-shortened-domain/asldjalsd';
+    const returnedShortened = 'www.some-shortUrl-domain/asldjalsd';
     const mockedFetch = jest.fn()
         .mockName('mocked fetch()')
         .mockImplementation(() => Promise.resolve({
             ok: true,
             status: 200,
-            json: () => Promise.resolve({ shortened: returnedShortened }),
+            json: () => Promise.resolve({ shortUrl: returnedShortened }),
         }));
     let originalFetch;
     let originalEnv;
@@ -84,28 +84,28 @@ describe('testing behavior of Home component', () => {
             expect(mountedComponent.get('#error').html()).toMatch(error);
         });
     
-        test('output url should be displayed when shortened is in state', async () => {
+        test('output url should be displayed when shortUrl is in state', async () => {
             expect(() => {
-                mountedComponent.get('#shortened');
+                mountedComponent.get('#short-url');
             }).toThrow();
     
-            const shortened = 'some-url.com/12312312';
-            mountedComponent.setData({ shortened });
+            const shortUrl = 'some-url.com/12312312';
+            mountedComponent.setData({ shortUrl });
             await mountedComponent.vm.$nextTick();
     
             expect(() => {
-                mountedComponent.get('#shortened');
+                mountedComponent.get('#short-url');
             }).not.toThrow();
-            expect(mountedComponent.get('#shortened').html()).toMatch(shortened);
+            expect(mountedComponent.get('#short-url').html()).toMatch(shortUrl);
         });
     
-        test('clipboard button should be displayed when shortened is in state', async () => {
+        test('clipboard button should be displayed when shortUrl is in state', async () => {
             expect(() => {
                 mountedComponent.get('#clipboard');
             }).toThrow();
     
-            const shortened = 'some-url.com/12312312';
-            mountedComponent.setData({ shortened });
+            const shortUrl = 'some-url.com/12312312';
+            mountedComponent.setData({ shortUrl });
             await mountedComponent.vm.$nextTick();
     
             expect(() => {
@@ -164,7 +164,7 @@ describe('testing behavior of Home component', () => {
             expect(JSON.parse(options.body)).toMatchObject({ url });
         });
 
-        test('making api call should update shortened component state if successful', async () => {
+        test('making api call should update shortUrl component state if successful', async () => {
             mountedComponent.get('#url').setValue('www.google.com');
             await mountedComponent.get('#shorten-button').trigger('click');
             await mountedComponent.vm.$nextTick();
@@ -174,7 +174,7 @@ describe('testing behavior of Home component', () => {
             // opening json of response is async
         // therefore need 3 nextTick total (including imlicit one in trigger())
 
-            expect(mountedComponent.vm.$data.shortened).toBe(returnedShortened);
+            expect(mountedComponent.vm.$data.shortUrl).toBe(returnedShortened);
         });
 
         test('making api call should update error when api was not successful', async () => {
@@ -206,30 +206,30 @@ describe('testing behavior of Home component', () => {
             expect(mountedComponent.vm.$data.error).toBe('');
         });
         
-        test('clicking on shorten button should reset shortened', async () => {
-            mountedComponent.setData({ shortened: 'some_value' });
+        test('clicking on shorten button should reset shortUrl', async () => {
+            mountedComponent.setData({ shortUrl: 'some_value' });
             
             mountedComponent.get('#url').setValue('');
             await mountedComponent.get('#shorten-button').trigger('click');
             await mountedComponent.vm.$nextTick();
             await mountedComponent.vm.$nextTick();
 
-            expect(mountedComponent.vm.$data.shortened).toBe('');
+            expect(mountedComponent.vm.$data.shortUrl).toBe('');
         });
 
-        test('clicking on button should copy content of shortened to clipboard', async () => {
-            const shortened = 'some_value';
+        test('clicking on button should copy content of shortUrl to clipboard', async () => {
+            const shortUrl = 'some_value';
             const mockedWrite = jest.fn().mockName('mocked writeText()');
             navigator.clipboard = {
                 writeText: mockedWrite,
             };
 
-            mountedComponent.setData({ shortened });
+            mountedComponent.setData({ shortUrl });
             await mountedComponent.vm.$nextTick();
             await mountedComponent.get('#clipboard').trigger('click');
 
             expect(mockedWrite).toHaveBeenCalledTimes(1);
-            expect(mockedWrite).toHaveBeenLastCalledWith(shortened);
+            expect(mockedWrite).toHaveBeenLastCalledWith(shortUrl);
         });
     });
 });

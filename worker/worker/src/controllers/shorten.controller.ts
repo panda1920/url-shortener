@@ -59,10 +59,10 @@ export class ShortenController {
       },
     })
     urlMappingToShort: { url: string; },
-  ): Promise<{ shortened: string; }> {
+  ): Promise<{ shortUrl: string; }> {
     // return this.urlMappingToShortMongoRepository.create(urlMappingToShort);
-    const shortened = await this.shortenService.shorten(urlMappingToShort.url);
-    return { shortened };
+    const shortUrl = await this.shortenService.shorten(urlMappingToShort.url);
+    return { shortUrl };
   }
 
   @get('/shorten/count', {
@@ -187,16 +187,21 @@ export class ShortenController {
     await this.urlMappingToShortMongoRepository.deleteById(id);
   }
 
-  @get('/shorten/url/{shortened}', {
+  @get('/shorten/url/{shortUrl}', {
     responses: { '301': { description: 'Redirecting provided path to real url' } }
   })
   async redirect(
     @inject(RestBindings.Http.RESPONSE) response: Response,
-    @param.path.string('shortened') shortened: string,
+    @param.path.string('shortUrl') shortUrl: string,
   ) {
-    console.log(shortened);
-    const url = await this.shortenService.expand(shortened);
+    let url = await this.shortenService.expand(shortUrl);
+    console.log(shortUrl);
     console.log(url);
-    response.redirect('https://www.yahoo.com');
+    if (!url)
+      response.redirect('https://www.yahoo.com');
+    else {
+      url = url.startsWith('http') ? url: 'http://' + url;
+      response.redirect(url);
+    }
   }
 }
