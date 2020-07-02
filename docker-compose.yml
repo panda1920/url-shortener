@@ -32,9 +32,14 @@ services:
       - MONGO_PASSWORD=password
       - MONGO_AUTHDB=admin
       - REDIS_HOST=redis
+      - REDIRECT_DEFAULT_SCHEME=http
       - REDIRECT_DEFAULT_HOST=localhost
       - REDIRECT_DEFAULT_PORT=8888
-      - SHORTEN_PATH=/shorten
+      - REDIRECT_DEFAULT_PATH=/error
+      - SHORTURL_SCHEME=http
+      - SHORTURL_HOST=localhost
+      - SHORTURL_PORT=8888
+      - SHORTURL_PATH=/shorten
     ports:
       - '3001:3000'
     depends_on:

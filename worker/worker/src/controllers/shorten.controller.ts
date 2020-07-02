@@ -53,7 +53,7 @@ export class ShortenController {
   ) {
     let url = await this.shortenService.expand(shortUrl);
     if (!url)
-      getClientUrl();
+      response.redirect( createDefaultRedirectUrl() );
     else {
       url = url.startsWith('http') ? url: 'http://' + url;
       response.redirect(url);
@@ -61,14 +61,18 @@ export class ShortenController {
   }
 }
 
-function getClientUrl(): string {
+function createDefaultRedirectUrl(): string {
+  const scheme = process.env.REDIRECT_DEFAULT_SCHEME || 'http';
   const host = process.env.REDIRECT_DEFAULT_HOST || 'localhost';
   const port = process.env.REDIRECT_DEFAULT_PORT || '8888';
-  return `http://${host}:${port}`;
-  // figure out what to do when TLS is neccessary
+  const path = process.env.REDIRECT_DEFAULT_PATH || '/error';
+  return `${scheme}://${host}:${port}${path}`;
 }
 
 function createCompleteShortUrl(shortUrl: string): string {
-  const shortenPath = process.env.SHORTEN_PATH || '/shorten';
-  return `${getClientUrl()}${shortenPath}/${shortUrl}`;
+  const scheme = process.env.SHORTURL_SCHEME || 'http';
+  const host = process.env.SHORTURL_HOST || 'localhost';
+  const port = process.env.SHORTURL_PORT || '8888';
+  const path = process.env.SHORTURL_PATH || '/shorten';
+  return `${scheme}://${host}:${port}${path}/${shortUrl}`;
 }
