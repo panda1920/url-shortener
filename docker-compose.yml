@@ -28,10 +28,13 @@ services:
     container_name: url-shortener-worker
     environment:
       - MONGO_HOST=mongo
-      - REDIS_HOST=redis
       - MONGO_USER=mongoadmin
       - MONGO_PASSWORD=password
       - MONGO_AUTHDB=admin
+      - REDIS_HOST=redis
+      - REDIRECT_DEFAULT_HOST=localhost
+      - REDIRECT_DEFAULT_PORT=8888
+      - SHORTEN_PATH=/shorten
     ports:
       - '3001:3000'
     depends_on:

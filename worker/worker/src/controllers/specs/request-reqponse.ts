@@ -29,3 +29,11 @@ export const refreshResponseSpec = {
     }
   }
 };
+
+export const shortenRequestBodySpec = {
+  content: {
+    'application/json': {
+      schema: schemas.shortenRequest
+    }
+  }
+};

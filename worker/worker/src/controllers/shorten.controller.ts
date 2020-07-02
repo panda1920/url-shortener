@@ -1,19 +1,11 @@
 import {
-  Count,
-  CountSchema,
-  Filter,
-  FilterExcludingWhere,
   repository,
-  Where,
 } from '@loopback/repository';
 import {
   post,
   param,
   get,
   getModelSchemaRef,
-  patch,
-  put,
-  del,
   requestBody,
   RestBindings,
   Response
@@ -24,6 +16,7 @@ import { inject } from '@loopback/context';
 
 import * as Mybindings from '../mybindings';
 import { ShortenService } from '../services/shorten.service';
+import * as Myspecs from './specs/request-reqponse';
 
 export class ShortenController {
   constructor(
@@ -37,154 +30,18 @@ export class ShortenController {
     responses: {
       '200': {
         description: 'UrlMappingToShort model instance',
-        content: {'application/json': {schema: getModelSchemaRef(UrlMappingToShort)}},
+        content: {'application/json': {
+          schema: getModelSchemaRef(UrlMappingToShort, { exclude: ['id', 'url'] })
+        }},
       },
     },
   })
   async create(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: {
-            title: 'Url shorten request',
-            type: 'object',
-            properties: {
-              url: { type: 'string', }
-            },
-            required: ['url'],
-            additionalProperties: false,
-            examples: [{ url: 'www.google.com' }],
-          }
-        },
-      },
-    })
+    @requestBody(Myspecs.shortenRequestBodySpec)
     urlMappingToShort: { url: string; },
   ): Promise<{ shortUrl: string; }> {
-    // return this.urlMappingToShortMongoRepository.create(urlMappingToShort);
     const shortUrl = await this.shortenService.shorten(urlMappingToShort.url);
-    return { shortUrl };
-  }
-
-  @get('/shorten/count', {
-    responses: {
-      '200': {
-        description: 'UrlMappingToShort model count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async count(
-    @param.where(UrlMappingToShort) where?: Where<UrlMappingToShort>,
-  ): Promise<Count> {
-    return this.urlMappingToShortMongoRepository.count(where);
-  }
-
-  @get('/shorten', {
-    responses: {
-      '200': {
-        description: 'Array of UrlMappingToShort model instances',
-        content: {
-          'application/json': {
-            schema: {
-              type: 'array',
-              items: getModelSchemaRef(UrlMappingToShort, {includeRelations: true}),
-            },
-          },
-        },
-      },
-    },
-  })
-  async find(
-    @param.filter(UrlMappingToShort) filter?: Filter<UrlMappingToShort>,
-  ): Promise<UrlMappingToShort[]> {
-    return this.urlMappingToShortMongoRepository.find(filter);
-  }
-
-  @patch('/shorten', {
-    responses: {
-      '200': {
-        description: 'UrlMappingToShort PATCH success count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(UrlMappingToShort, {partial: true}),
-        },
-      },
-    })
-    urlMappingToShort: UrlMappingToShort,
-    @param.where(UrlMappingToShort) where?: Where<UrlMappingToShort>,
-  ): Promise<Count> {
-    return this.urlMappingToShortMongoRepository.updateAll(urlMappingToShort, where);
-  }
-
-  @get('/shorten/{id}', {
-    responses: {
-      '200': {
-        description: 'UrlMappingToShort model instance',
-        content: {
-          'application/json': {
-            schema: getModelSchemaRef(UrlMappingToShort, {includeRelations: true}),
-          },
-        },
-      },
-    },
-  })
-  async findById(
-    @param.path.string('id') id: string,
-    @param.filter(UrlMappingToShort, {exclude: 'where'}) filter?: FilterExcludingWhere<UrlMappingToShort>
-  ): Promise<UrlMappingToShort> {
-    return this.urlMappingToShortMongoRepository.findById(id, filter);
-  }
-
-  @patch('/shorten/{id}', {
-    responses: {
-      '204': {
-        description: 'UrlMappingToShort PATCH success',
-      },
-    },
-  })
-  async updateById(
-    @param.path.string('id') id: string,
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(UrlMappingToShort, {partial: true}),
-        },
-      },
-    })
-    urlMappingToShort: UrlMappingToShort,
-  ): Promise<void> {
-    await this.urlMappingToShortMongoRepository.updateById(id, urlMappingToShort);
-  }
-
-  @put('/shorten/{id}', {
-    responses: {
-      '204': {
-        description: 'UrlMappingToShort PUT success',
-      },
-    },
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() urlMappingToShort: UrlMappingToShort,
-  ): Promise<void> {
-    await this.urlMappingToShortMongoRepository.replaceById(id, urlMappingToShort);
-  }
-
-  @del('/shorten/{id}', {
-    responses: {
-      '204': {
-        description: 'UrlMappingToShort DELETE success',
-      },
-    },
-  })
-  async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.urlMappingToShortMongoRepository.deleteById(id);
+    return { shortUrl: createCompleteShortUrl(shortUrl) };
   }
 
   @get('/shorten/url/{shortUrl}', {
@@ -195,13 +52,23 @@ export class ShortenController {
     @param.path.string('shortUrl') shortUrl: string,
   ) {
     let url = await this.shortenService.expand(shortUrl);
-    console.log(shortUrl);
-    console.log(url);
     if (!url)
-      response.redirect('https://www.yahoo.com');
+      getClientUrl();
     else {
       url = url.startsWith('http') ? url: 'http://' + url;
       response.redirect(url);
     }
   }
+}
+
+function getClientUrl(): string {
+  const host = process.env.REDIRECT_DEFAULT_HOST || 'localhost';
+  const port = process.env.REDIRECT_DEFAULT_PORT || '8888';
+  return `http://${host}:${port}`;
+  // figure out what to do when TLS is neccessary
+}
+
+function createCompleteShortUrl(shortUrl: string): string {
+  const shortenPath = process.env.SHORTEN_PATH || '/shorten';
+  return `${getClientUrl()}${shortenPath}/${shortUrl}`;
 }
