@@ -5,15 +5,17 @@
       Test API
     </button>
     <router-view></router-view>
+    <Footer />
   </div>
 </template>
 
 <script>
   import Header from '@/components/header';
+  import Footer from '@/components/footer';
   import userAuthMixin from '@/mixins/user-auth';
 
   export default {
-    components: { Header },
+    components: { Header, Footer },
 
     mixins: [userAuthMixin],
 
@@ -54,7 +56,6 @@
     padding: 0;
 
     font-family: 'Open Sans', sans-serif;
-    font-size: $font-size-normal;
   }
 
   button, input {
@@ -65,6 +66,7 @@
     appearance: none;
     box-shadow: none;
     border: 1px solid;
+    font-size: $font-size-normal;
   }
 
   input {

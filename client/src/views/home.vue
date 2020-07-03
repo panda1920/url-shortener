@@ -124,9 +124,8 @@
     }
 
     .shorten-main {
-      padding: 1em $h-padding;
+      padding: 1.5em $h-padding;
       background-color: $primary-color;
-      font-size: $font-size-input;
 
       .shorten-input {
         display: flex;

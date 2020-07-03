@@ -2,7 +2,8 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Router from 'vue-router';
 
 import App from '@/App.vue';
-import Header from '@/components/Header.vue';
+import Header from '@/components/header.vue';
+import Footer from '@/components/footer.vue';
 
 describe('testing behavior of App component', () => {
     let mountedApp;
@@ -37,6 +38,11 @@ describe('testing behavior of App component', () => {
     test('header component should be displayed', () => {
         const headerWrapper = mountedApp.findComponent(Header);
         expect(headerWrapper.exists()).toBe(true);
+    });
+
+    test('footer component should be displayed', () => {
+        const footerWrapper = mountedApp.findComponent(Footer);
+        expect(footerWrapper.exists()).toBe(true);
     });
 
     test('app should restore persist info when it mounts', () => {
