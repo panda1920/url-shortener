@@ -231,5 +231,11 @@ describe('testing behavior of Home component', () => {
             expect(mockedWrite).toHaveBeenCalledTimes(1);
             expect(mockedWrite).toHaveBeenLastCalledWith(shortUrl);
         });
+
+        test('hitting enter while input selected should have the same effect as clicking shorten button', async () => {
+            await mountedComponent.get('#url').trigger('keydown', { key: 'Enter' });
+
+            expect(mountedComponent.vm.$data.error).not.toBe('');
+        });
     });
 });

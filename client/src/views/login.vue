@@ -4,24 +4,26 @@
       Login
     </p>
 
-    <input
-      id='input-username'
-      v-model='username'
-      type='text'
-      placeholder='Email'
-    >
-    <input
-      id='input-password'
-      v-model='password'
-      type='password'
-      placeholder='Password'
-    >
+    <div class='inputs' @keydown.enter='loginHandler'>
+      <input
+        id='input-username'
+        v-model='username'
+        type='text'
+        placeholder='Email'
+      >
+      <input
+        id='input-password'
+        v-model='password'
+        type='password'
+        placeholder='Password'
+      >
+    </div>
     <button id='button-login' @click='loginHandler'>
       Login
     </button>
 
     <div v-if='error' id='error'>
-      {{ error }}
+      Error: {{ error }}
     </div>
   </div>
 </template>

@@ -8,16 +8,16 @@
         {{ instruction }}
       </div>
     </div>
-    <button ref='shorten' @click='toggleShorten'>
-      Shorten
-    </button>
-    <button ref='error' @click='toggleError'>
-      Error
-    </button>
 
     <div class='shorten-main'>
       <div class='shorten-input'>
-        <input id='url' v-model='url' type='text' placeholder='Shorten url'>
+        <input
+          id='url'
+          v-model='url'
+          type='text'
+          placeholder='Shorten url'
+          @keydown.enter.prevent='shorten'
+        >
         <button id='shorten-button' @click='shorten'>
           Shorten
         </button>
@@ -31,7 +31,7 @@
         </div>
       </div>
       <div v-if='error' id='error'>
-        {{ error }}
+        Error: {{ error }}
       </div>
     </div>
   </div>
@@ -99,13 +99,6 @@
       async copyToClipboard() {
         await navigator.clipboard.writeText(this.shortUrl);
       },
-
-      toggleShorten() {
-        this.shortUrl = this.shortUrl ? '' : 'www.google.com/?q=helloworld';
-      },
-      toggleError() {
-        this.error = this.error ? '' : 'Something wrong with API';
-      }
     },
 
   };

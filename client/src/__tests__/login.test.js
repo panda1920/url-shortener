@@ -185,6 +185,21 @@ describe('testing behavior of Login component', () => {
             expect(wrapper.vm.$data.error).toBe('');
         });
 
+        test('hitting enter while input selected has same effect as clicking login button', async () => {
+            const inputs = [
+                wrapper.get('#input-username'),
+                wrapper.get('#input-password'),
+            ];
+
+            for (const input of inputs) {
+                wrapper.vm.$data.error = '';
+
+                await input.trigger('keydown', { key: 'Enter' });
+
+                expect(wrapper.vm.$data.error).not.toBe('');
+            }
+        });
+
         async function setInput(wrapper, input = {}) {
             let { username, password } = input;
             username = username !== undefined ? username : 'default_user@example.com';

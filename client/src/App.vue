@@ -1,17 +1,9 @@
 <template>
   <div class='app'>
     <Header :login-info='loginInfo' :clear-login-info='clearLoginInfo' />
-    <!-- This is a url-shortener App!
-    <button @click='increment'>
-      Click me!
-    </button> -->
-    <!-- <div id='count'>
-      {{ counter }}
-    </div> -->
     <button @click='testAPI'>
       Test API
     </button>
-    HELLO WORLD!
     <router-view></router-view>
   </div>
 </template>
@@ -40,12 +32,6 @@
     },
 
     methods: {
-      increment() {
-        this.counter++;
-        console.log(process.env.NODE_ENV);
-        console.log(process.env.API_PATH);
-        console.log(process.env.TOKEN_REFRESH_INTERVAL);
-      },
       clearLoginInfo() {
         this.loginInfo.token = '';
         this.loginInfo.username = '';
