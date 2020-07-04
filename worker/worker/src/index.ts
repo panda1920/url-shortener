@@ -1,4 +1,6 @@
 import {ApplicationConfig, WorkerApplication} from './application';
+import { UserRepository } from './repositories';
+import { User } from './models';
 
 export * from './application';
 
@@ -11,7 +13,23 @@ export async function main(options: ApplicationConfig = {}) {
   console.log(`Server is running at ${url}`);
   console.log(`Try ${url}/ping`);
 
+  await addTestUser(app);
+
   return app;
+}
+
+async function addTestUser(app: WorkerApplication): Promise<void> {
+  if (process.env.NODE_ENV === 'production')
+    return;
+
+  const testUser = new User({ username: 'admin@example.com', password: 'password' });
+  const repo = await app.getRepository(UserRepository);
+  const foundUser = await repo.findOne({ where: { username: testUser.username }});
+  if (foundUser)
+    return;
+
+  console.log('Adding test user to database');
+  await repo.create(testUser);
 }
 
 if (require.main === module) {

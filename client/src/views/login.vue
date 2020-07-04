@@ -76,7 +76,7 @@
   @import '../styles/global';
 
   .login {
-    padding: 100px $h-padding;
+    padding: $vertical-space-large $h-padding;
 
     input {
       @include form-element;

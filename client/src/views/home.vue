@@ -115,7 +115,7 @@
 
   .home {
     .shorten-introduction {
-      padding: 100px $h-padding;
+      padding: $vertical-space-large $h-padding;
 
       #description {
         font-size: $font-size-heading;

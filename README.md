@@ -14,3 +14,10 @@ Attempt to recreate a url-shortener app from scratch.
 docker-compose up -d
 ```
 4. Open the browser at localhost:8888
+
+#### Test user
+Test user will be created automatically when testing locally.
+Use the following credential to login as test user:
+
+Username: admin@example.com
+Password: password

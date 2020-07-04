@@ -27,7 +27,7 @@ export default {
 
   .footer {
     padding: 0 $h-padding;
-    margin-top: $vertical-space-medium;
+    margin-top: $vertical-space-large;
     font-size: $font-size-small;
   }
 
