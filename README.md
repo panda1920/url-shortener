@@ -18,7 +18,6 @@ docker-compose up -d
 #### Test user
 Test user will be created automatically when testing locally.  
 Use the following credential to login as test user:
-```
-Username: admin@example.com  
-Password: password
-```
+
+* Email: `admin@example.com`
+* Password: `password`
