@@ -16,8 +16,9 @@ docker-compose up -d
 4. Open the browser at localhost:8888
 
 #### Test user
-Test user will be created automatically when testing locally.
+Test user will be created automatically when testing locally.  
 Use the following credential to login as test user:
-
-Username: admin@example.com
+```
+Username: admin@example.com  
 Password: password
+```
