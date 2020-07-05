@@ -1,8 +1,6 @@
 import {ApplicationConfig, WorkerApplication} from './application';
 import { UserRepository } from './repositories';
 import { User } from './models';
-import { PasswordHasherService } from './services/password-hasher.service';
-import * as Mybindings from './mybindings';
 
 export * from './application';
 
@@ -13,7 +11,6 @@ export async function main(options: ApplicationConfig = {}) {
 
   const url = app.restServer.url;
   console.log(`Server is running at ${url}`);
-  console.log(`Try ${url}/ping`);
 
   await addTestUser(app);
 
@@ -24,16 +21,15 @@ async function addTestUser(app: WorkerApplication): Promise<void> {
   if (process.env.NODE_ENV === 'production')
     return;
 
-  const hasher: PasswordHasherService = await app.get(Mybindings.PASSWORD_HASHER_SERVICE);
   const username = 'admin@example.com';
-  const password = await hasher.hashPassword('password');
+  const password = 'password';
   const testUser = new User({ username, password });
   
   const repo = await app.getRepository(UserRepository);
-  const foundUser = await repo.findOne({ where: { username: testUser.username }});
+  const foundUser = await repo.findOne({ where: { username }});
   if (foundUser)
     return;
-    
+
   console.log('Adding test user to database');
   await repo.create(testUser);
 }
@@ -57,28 +53,20 @@ if (require.main === module) {
     },
   };
 
-  // prevent main thread failing when backend DB is not yet online
-  const START_ATTEMPT_TIMES = 10;
-  const START_ATTEMPT_INTERVAL = 5;
+  // prevent main program from failing by giving some time for DB to startup
+  const START_DELAY = 5;
 
-  async function startMain(iterateTimes: number): Promise<void> {
-    if (iterateTimes <= 0) {
-      console.error('Cannot start the application');
-      process.exit(1);
-    }
-
-    try {
-      await main(config);
-    }
-    catch(err) {
-      console.log(`Failed to start appication; restarting in ${START_ATTEMPT_INTERVAL}s`);
-      setTimeout(() => startMain(iterateTimes - 1), START_ATTEMPT_INTERVAL * 1000);
-    }
+  async function startMain(): Promise<void> {
+    setTimeout(async () => {
+      try {
+        await main(config);
+      }
+      catch(err) {
+        console.error('Cannot start the application.', err);
+        process.exit(1);
+      }
+    }, START_DELAY * 1000);
   }
 
-  startMain(START_ATTEMPT_TIMES);
-  // main(config).catch(err => {
-  //   console.error('Cannot start the application.', err);
-  //   process.exit(1);
-  // });
+  startMain();
 }
