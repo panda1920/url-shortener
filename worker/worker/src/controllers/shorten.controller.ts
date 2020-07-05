@@ -13,6 +13,7 @@ import {
 import {UrlMappingToShort} from '../models';
 import {UrlMappingToShortMongoRepository} from '../repositories';
 import { inject } from '@loopback/context';
+import { authenticate } from '@loopback/authentication';
 
 import * as Mybindings from '../mybindings';
 import { ShortenService } from '../services/shorten.service';
@@ -26,6 +27,7 @@ export class ShortenController {
     public shortenService: ShortenService,
   ) {}
 
+  @authenticate('jwt')
   @post('/shorten', {
     responses: {
       '200': {

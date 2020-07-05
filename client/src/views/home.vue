@@ -91,6 +91,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.token}`,
           },
           body: JSON.stringify({ url: this.url }),
         });

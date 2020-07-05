@@ -2,6 +2,10 @@ const userAuthMixin = {
     computed: {
         isAuthenticated() {
             return !!this.$store.getters.token;
+        },
+        
+        token() {
+            return this.$store.getters.token;
         }
     },
 
@@ -45,7 +49,7 @@ const userAuthMixin = {
 
         restore() {
             this.$store.dispatch('restoreToken');
-        }
+        },
     }
 };
 

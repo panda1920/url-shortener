@@ -3,13 +3,16 @@ import { shallowMount } from '@vue/test-utils';
 import Home from '@/views/home.vue';
 
 describe('testing behavior of Home component', () => {
-    const returnedShortened = 'www.some-shortUrl-domain/asldjalsd';
+    const TEST_DATA = {
+        returnedShortened: 'www.some-shortUrl-domain/asldjalsd',
+        token: 'adasldghauasdlajhsdioajjsdasd',
+    };
     const mockedFetch = jest.fn()
         .mockName('mocked fetch()')
         .mockImplementation(() => Promise.resolve({
             ok: true,
             status: 200,
-            json: () => Promise.resolve({ shortUrl: returnedShortened }),
+            json: () => Promise.resolve({ shortUrl: TEST_DATA.returnedShortened }),
         }));
     let originalFetch;
     let originalEnv;
@@ -40,7 +43,7 @@ describe('testing behavior of Home component', () => {
         const isAuthenticated = () => (loggedIn === false) ? false : true;
 
         return shallowMount(Home, {
-            mixins: [{ computed: { isAuthenticated } }],
+            mixins: [{ computed: { isAuthenticated, token: () => TEST_DATA.token } }],
         });
     }
 
@@ -160,7 +163,10 @@ describe('testing behavior of Home component', () => {
             const [apiEndpoint, options] = mockedFetch.mock.calls[0];
             expect(apiEndpoint).toBe(TEST_ENV.API_PATH + '/shorten');
             expect(options.method).toBe('POST');
-            expect(options.headers).toMatchObject({ 'Content-Type': 'application/json' });
+            expect(options.headers).toMatchObject({
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${TEST_DATA.token}`,
+            });
             expect(JSON.parse(options.body)).toMatchObject({ url });
         });
 
@@ -174,7 +180,7 @@ describe('testing behavior of Home component', () => {
             // opening json of response is async
         // therefore need 3 nextTick total (including imlicit one in trigger())
 
-            expect(mountedComponent.vm.$data.shortUrl).toBe(returnedShortened);
+            expect(mountedComponent.vm.$data.shortUrl).toBe(TEST_DATA.returnedShortened);
         });
 
         test('making api call should update error when api was not successful', async () => {
