@@ -1,6 +1,8 @@
 import {ApplicationConfig, WorkerApplication} from './application';
 import { UserRepository } from './repositories';
 import { User } from './models';
+import { PasswordHasherService } from './services/password-hasher.service';
+import * as Mybindings from './mybindings';
 
 export * from './application';
 
@@ -22,12 +24,16 @@ async function addTestUser(app: WorkerApplication): Promise<void> {
   if (process.env.NODE_ENV === 'production')
     return;
 
-  const testUser = new User({ username: 'admin@example.com', password: 'password' });
+  const hasher: PasswordHasherService = await app.get(Mybindings.PASSWORD_HASHER_SERVICE);
+  const username = 'admin@example.com';
+  const password = await hasher.hashPassword('password');
+  const testUser = new User({ username, password });
+  
   const repo = await app.getRepository(UserRepository);
   const foundUser = await repo.findOne({ where: { username: testUser.username }});
   if (foundUser)
     return;
-
+    
   console.log('Adding test user to database');
   await repo.create(testUser);
 }

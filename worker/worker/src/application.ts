@@ -21,6 +21,7 @@ import MyUserService from './services/user.service';
 import JwtService from './services/jwt.service';
 import JwtStrategy from './auth-strategy/jwt.strategy';
 import { HashShortenService } from './services/shorten.service';
+import { BcryptPasswordHasher } from './services/password-hasher.service';
 
 export {ApplicationConfig};
 
@@ -69,6 +70,9 @@ export class WorkerApplication extends BootMixin(
       .inScope(BindingScope.SINGLETON);
     this.bind(mybindings.SHORTEN_SERVICE)
       .toClass(HashShortenService)
+      .inScope(BindingScope.SINGLETON);
+    this.bind(mybindings.PASSWORD_HASHER_SERVICE)
+      .toClass(BcryptPasswordHasher)
       .inScope(BindingScope.SINGLETON);
 
     const secret = process.env.TOKEN_SECRET || 'secret';
