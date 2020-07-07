@@ -1,9 +1,6 @@
 <template>
   <div class='app'>
     <Header :login-info='loginInfo' :clear-login-info='clearLoginInfo' />
-    <button @click='testAPI'>
-      Test API
-    </button>
     <router-view></router-view>
     <Footer />
   </div>
@@ -20,12 +17,13 @@
     mixins: [userAuthMixin],
 
     data: () => ({
-      counter: 0,
-      someData: 12,
-      loginInfo: {
-        token: '',
-        username: '',
-      },
+      checkboxes: [
+        { id: 'checkbox1', value: '1' },
+        { id: 'checkbox2', value: '2' },
+        { id: 'checkbox3', value: '3' },
+        { id: 'checkbox4', value: '4' },
+      ],
+      checkedValues: {},
     }),
 
     created() {
@@ -34,10 +32,6 @@
     },
 
     methods: {
-      clearLoginInfo() {
-        this.loginInfo.token = '';
-        this.loginInfo.username = '';
-      },
       async testAPI() {
         const response = await window.fetch('/api/users', { method: 'GET' });
         const json = await response.json();
