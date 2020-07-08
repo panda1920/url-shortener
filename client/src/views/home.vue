@@ -109,9 +109,9 @@
   @import '../styles/global';
 
   @mixin home-inputs {
-    @include form-element;
-    margin-bottom: 0px;
-    padding: 15px 10px;
+    @include input-element;
+
+    padding: 1em;
   }
 
   .home {
@@ -134,8 +134,7 @@
 
         input {
           @include home-inputs;
-          background-color: white;
-          
+
           flex: 9 1 auto;
           margin-right: 5px;
         }
@@ -156,7 +155,6 @@
           @include home-inputs;
           
           flex: 1 1 auto;
-          background-color: white;
           border-top-right-radius: 0;
           border-bottom-right-radius: 0;
         }

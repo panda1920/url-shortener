@@ -1,29 +1,31 @@
 <template>
   <div class='login'>
-    <p id='title'>
-      Login
-    </p>
+    <div class='login-form'>
+      <p id='title'>
+        Login
+      </p>
+      <div class='inputs' @keydown.enter='loginHandler'>
+        <label for='input-username'>Email</label>
+        <input
+          id='input-username'
+          v-model='username'
+          type='text'
+        >
 
-    <div class='inputs' @keydown.enter='loginHandler'>
-      <input
-        id='input-username'
-        v-model='username'
-        type='text'
-        placeholder='Email'
-      >
-      <input
-        id='input-password'
-        v-model='password'
-        type='password'
-        placeholder='Password'
-      >
-    </div>
-    <button id='button-login' @click='loginHandler'>
-      Login
-    </button>
+        <label for='input-password'>Password</label>
+        <input
+          id='input-password'
+          v-model='password'
+          type='password'
+        >
+      </div>
+      <button id='button-login' @click='loginHandler'>
+        Login
+      </button>
 
-    <div v-if='error' id='error'>
-      Error: {{ error }}
+      <div v-if='error' id='error'>
+        Error: {{ error }}
+      </div>
     </div>
   </div>
 </template>
@@ -75,16 +77,33 @@
 <style lang='scss' scoped>
   @import '../styles/global';
 
-  .login {
-    padding: $vertical-space-large $h-padding;
+  .login-form {
+    border-radius: $border-radius-element;
+    margin: $vertical-space-large $h-padding;
+    padding: 2em;
+
+    background-color: darken(white, 15%);
+
+    @mixin login-form-element {
+      @include input-element;
+
+      padding: 0.5em 1em;
+      margin-bottom: $vertical-space-small;
+    }
+
+    label {
+      display: block;
+      width: calc(#{$main-width} / 2);
+      margin-bottom: 0.5em;
+    }
 
     input {
-      @include form-element;
+      @include login-form-element;
       width: calc(#{$main-width} / 2);
     }
 
     button {
-      @include form-element;
+      @include login-form-element;
       width: calc(#{$main-width} / 5);
     }
   }

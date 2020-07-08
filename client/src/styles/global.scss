@@ -44,11 +44,8 @@ $border-radius-element: 5px;
     }
 }
 
-@mixin form-element {
+@mixin input-element {
     display: block;
-    padding: 5px;
-    margin-bottom: $vertical-space-small;
-    
     border-radius: $border-radius-element;
 
     &:focus {

@@ -50,6 +50,7 @@
     padding: 0;
 
     font-family: 'Open Sans', sans-serif;
+    color: $primary-color;
   }
 
   button, input {
@@ -65,6 +66,7 @@
 
   input {
     border-color: lighten($primary-color, 20%);
+    background-color: white;
   }
 
   button {

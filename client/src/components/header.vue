@@ -49,8 +49,6 @@
     position: relative;
 
     background-color: $primary-color;
-    color: $secondary-color;
-
     min-height: $header-height;
     padding: 0 $h-padding;
 
@@ -60,18 +58,20 @@
 
       font-size: $header-font-size;
       letter-spacing: 2px;
-
+      color: white;
     }
 
     .options {
       @include v-center;
+
       display: flex;
       flex-direction: row;
-
       right: $h-padding;
 
       #login, #logout {
         @include header-button;
+
+        color: $secondary-color;
       }
     }
   }
