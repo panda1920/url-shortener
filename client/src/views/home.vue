@@ -158,6 +158,7 @@
           flex: 1 1 auto;
           border-top-right-radius: 0;
           border-bottom-right-radius: 0;
+          background-color: white;
         }
 
         #clipboard {
