@@ -27,6 +27,12 @@
         Error: {{ error }}
       </div>
     </div>
+
+    <div v-if='!isProduction' id='test-user-info'>
+      <p>Use the following test user credential for testing/development.</p>
+      <p>Email: admin@example.com</p>
+      <p>Password: password</p>
+    </div>
   </div>
 </template>
 
@@ -43,6 +49,12 @@
       username: '',
       password: '',
     }),
+
+    computed: {
+      isProduction() {
+        return process.env.NODE_ENV === 'production';
+      }
+    },
 
     methods: {
       async loginHandler() {
@@ -111,6 +123,10 @@
   #title {
     font-size: $font-size-heading;
     margin-bottom: $vertical-space-medium;
+  }
+
+  #test-user-info {
+    margin: 0 $h-padding $vertical-space-medium $h-padding;
   }
 
 </style>

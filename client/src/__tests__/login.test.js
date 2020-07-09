@@ -4,14 +4,21 @@ import Login from '@/views/login.vue';
 
 describe('testing behavior of Login component', () => {
     let wrapper;
+    let originalEnv;
     const mockLogin = jest.fn()
         .mockName('mocked login() function from mixin');
 
     beforeEach(() => {
+        originalEnv = process.env;
+        process.env = {
+            NODE_ENV: 'development',
+        };
+        
         wrapper = mountLogin();
     });
     afterEach(() => {
         mockLogin.mockClear();
+        process.env = originalEnv;
     });
     
     function mountLogin(options = {}) {
@@ -73,6 +80,23 @@ describe('testing behavior of Login component', () => {
                 wrapper.get('#error');
             }).not.toThrow();
             expect(wrapper.get('#error').html()).toMatch(error);
+        });
+
+        test('test user credentials are displayed when env is development', () => {
+            expect(() => {
+                wrapper.get('#test-user-info');
+            }).not.toThrow();
+        });
+
+        test('test user credentials are not displayed when env is production', () => {
+            process.env = {
+                NODE_ENV: 'production'
+            };
+            wrapper = mountLogin();
+
+            expect(() => {
+                wrapper.get('#test-user-info');
+            }).toThrow();
         });
     });
 

@@ -127,6 +127,7 @@
     .shorten-main {
       padding: 1.5em $h-padding;
       background-color: $primary-color;
+      margin-bottom: $vertical-space-large;
 
       .shorten-input {
         display: flex;

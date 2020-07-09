@@ -1,6 +1,6 @@
 <template>
   <div class='app'>
-    <Header :login-info='loginInfo' :clear-login-info='clearLoginInfo' />
+    <Header />
     <router-view></router-view>
     <Footer />
   </div>
