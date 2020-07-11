@@ -16,16 +16,6 @@
 
     mixins: [userAuthMixin],
 
-    data: () => ({
-      checkboxes: [
-        { id: 'checkbox1', value: '1' },
-        { id: 'checkbox2', value: '2' },
-        { id: 'checkbox3', value: '3' },
-        { id: 'checkbox4', value: '4' },
-      ],
-      checkedValues: {},
-    }),
-
     created() {
       this.restore();
       this.refresh();

@@ -13,8 +13,9 @@ const userAuthMixin = {
         async login(username, password) {
             const response = await sendLoginRequest(username, password);
 
-            if (!response.ok)
+            if (!response.ok) {
                 throw 'api call failed';
+            }
 
             const { token } = await response.json();
             this.$store.commit('storeToken', { token });
