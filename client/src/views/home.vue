@@ -1,9 +1,9 @@
 <template>
   <div class='home'>
     <div class='shorten-introduction'>
-      <div id='description'>
+      <h1 id='description'>
         {{ description }}
-      </div>
+      </h1>
       <div id='instruction'>
         {{ instruction }}
       </div>

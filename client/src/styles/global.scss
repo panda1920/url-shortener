@@ -11,6 +11,8 @@ $main-width: 800px;
 $h-padding: calc((100vw - #{$main-width}) / 2);
 $clipboard-width: 52px;
 
+$font-heading: 'Open Sans', sans-serif;
+$font-body: 'Merriweather', serif;
 $font-size-small: 12px;
 $font-size-normal: 16px;
 $font-size-heading: 40px;
@@ -38,6 +40,7 @@ $border-radius-element: 5px;
 
 @mixin header-button {
     cursor: pointer;
+    font-family: $font-heading;
 
     &:hover {
         color: darken($secondary-color, 10%);
@@ -47,6 +50,7 @@ $border-radius-element: 5px;
 @mixin input-element {
     display: block;
     border-radius: $border-radius-element;
+    font-family: $font-heading;
 
     &:focus {
         border-color: $secondary-color;
