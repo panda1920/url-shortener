@@ -28,6 +28,7 @@ services:
     container_name: url-shortener-worker
     environment:
       - NODE_ENV=development
+      - MONGO_PROTOCOL=mongodb
       - MONGO_HOST=mongo
       - MONGO_USER=mongoadmin
       - MONGO_PASSWORD=password

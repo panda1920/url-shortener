@@ -1,9 +1,9 @@
 <template>
   <div class='login'>
     <div class='login-form'>
-      <h1 id='title'>
+      <h3 id='title'>
         Login
-      </h1>
+      </h3>
       <div class='inputs' @keydown.enter='loginHandler'>
         <label for='input-username'>Email</label>
         <input

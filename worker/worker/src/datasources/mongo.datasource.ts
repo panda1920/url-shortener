@@ -6,16 +6,29 @@ import {
 } from '@loopback/core';
 import {juggler} from '@loopback/repository';
 
+function createMongoUri(): string {
+  const protocol = process.env.MONGO_PROTOCOL || 'mongodb';
+  const host = process.env.MONGO_HOST || "localhost";
+  const port = process.env.MONGO_PORT || "27017";
+  const user = process.env.MONGO_USER || 'mongoadmin';
+  const password = process.env.MONGO_PASSWORD || 'password';
+  const database = process.env.MONGO_DBNAME || "url-shortener";
+  const options = process.env.MONGO_OPTIONS || '';
+
+  return `${protocol}://`
+    + `${user}:${password}@`
+    // mongodb+srv does not accept ports in its uri
+    + (protocol === 'mongodb+srv'
+      ? `${host}/${database}${options}`
+      : `${host}:${port}/${database}${options}`)
+}
+
 export const mongoConfig = {
     name: "mongo",
     connector: "mongodb",
-    url: "",
-    host: process.env.MONGO_HOST || "localhost",
-    port: process.env.MONGO_PORT || "27017",
-    user: process.env.MONGO_USER || 'mongoadmin',
-    password: process.env.MONGO_PASSWORD || 'password',
-    database: process.env.MONGO_DBNAME || "url-shortener",
+    url: createMongoUri(),
     authSource: process.env.MONGO_AUTHDB || "admin",
+    protocol: process.env.MONGO_PROTOCOL || 'mongodb',
     useNewUrlParser: true
 };
 
