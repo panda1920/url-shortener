@@ -11,6 +11,7 @@ export interface ShortenService {
   expand(shortUrl: string): Promise<string | null>;
 };
 
+// implemented interactions with cache/persistent storage
 abstract class ShortenServiceStoreImplemented implements ShortenService {
   constructor(
     private redisRepository: UrlMappingToShortRedisRepository,
@@ -22,7 +23,7 @@ abstract class ShortenServiceStoreImplemented implements ShortenService {
 
   protected async saveSafe(url: string, shortUrl: string): Promise<void> {
     await this.save(url, shortUrl);
-    const savedUrl = await this.loadMongoUrl(shortUrl); // just check mongo
+    const savedUrl = await this.loadUrl(shortUrl);
 
     if (savedUrl === null) {
       console.error(`Failed to shorten url. ${url} -> ${shortUrl}`);
@@ -48,25 +49,30 @@ abstract class ShortenServiceStoreImplemented implements ShortenService {
   }
 
   protected async loadUrl(shortUrl: string): Promise<string | null> {
-    let response = await this.redisRepository.get(shortUrl);
+    // get data from cache first
+    const response = await this.redisRepository.get(shortUrl);
     if (response)
       return response.url;
     
-    const url = await this.loadMongoUrl(shortUrl);
-    if (url)
-      this.saveCache(url, shortUrl);
-    return url;
+    // only get from mongoo when cache miss
+    const result  = await this.mongoRepository.find({ where: { shortUrl }})
+    if (result.length < 1)
+      return null;
+      
+    this.saveCache(result[0].url, shortUrl);
+    return result[0].url;
   }
 
-  protected async loadMongoUrl(shortUrl: string): Promise<string | null> {
-    const result = await this.mongoRepository.find({ where: { shortUrl }});
+  protected async loadShort(url: string): Promise<string | null> {
+    const result  = await this.mongoRepository.find({ where: { url }})
     if (result.length < 1)
       return null;
 
-    return result[0].url;
+    return result[0].shortUrl;
   }
 }
 
+// one implementation of shortening algorithm
 export class HashShortenService extends ShortenServiceStoreImplemented {
   // 281 trillion numbers can be represented with 8 character of 64 base
   // log base 2 of that is exactly 48 bits
@@ -83,7 +89,11 @@ export class HashShortenService extends ShortenServiceStoreImplemented {
   }
 
   async shorten(url: string): Promise<string> {
-    return await this.generateShort(url);
+    let shortUrl = await this.loadShort(url);
+    if (!shortUrl)
+      shortUrl = await this.generateShort(url);
+
+    return shortUrl;
   }
 
   async expand(shortUrl: string): Promise<string | null> {

@@ -27,7 +27,7 @@ export const mongoConfig = {
     name: "mongo",
     connector: "mongodb",
     url: createMongoUri(),
-    authSource: process.env.MONGO_AUTHDB || "admin",
+    authSource: process.env.MONGO_AUTHDB || 'admin',
     protocol: process.env.MONGO_PROTOCOL || 'mongodb',
     useNewUrlParser: true
 };
