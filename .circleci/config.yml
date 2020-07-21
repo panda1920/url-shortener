@@ -63,4 +63,4 @@ workflows:
             branches:
               only: master
       - publish_image:
-          requires:
+          requires: test_frontend
