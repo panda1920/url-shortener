@@ -32,6 +32,28 @@ jobs:
           key: v1-url-shortener-{{ checksum "./client/package-lock.json" }}
           when: on_success
 
+  publish_image:
+    executor: node_env
+    environment:
+      IMAGENAME_FRONTEND: panda1920/url-shortener-client:latest
+      IMAGENAME_BACKEND: panda1920/url-shortener-worker:latest
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build image
+          command: |
+            cd ./client
+            npm run build:docker
+            cd ../worker/worker
+            npm run docker:build
+      - run:
+          name: Publish image to dockerhub
+          command: |
+            echo "$DOCKERHUB_PASSWORD" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+            docker push $IMAGENAME_FRONTEND
+            docker push $IMAGENAME_BACKEND
+
 
 workflows:
   build_and_test:
@@ -40,3 +62,5 @@ workflows:
           filters:
             branches:
               only: master
+      - publish_image:
+          requires:
