@@ -20,7 +20,7 @@
     "eslint:fix": "npm run eslint -- --fix",
     "pretest": "npm run clean && npm run build",
     "posttest": "npm run lint",
-    "docker:build": "docker build -t worker .",
+    "docker:build": "docker image build --no-cache --pull -t panda1920/url-shortener-worker:latest .",
     "docker:run": "docker run -p 3000:3000 -d worker",
     "migrate": "node ./dist/migrate",
     "prestart": "npm run build",

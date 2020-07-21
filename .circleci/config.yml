@@ -1,0 +1,42 @@
+version: 2.1
+
+# orbs:
+
+executors:
+  node_env:
+    docker:
+      - image: circleci/node
+
+jobs:
+  test_frontend:
+    executor: node_env
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-url-shortener-{{ checksum "./client/package-lock.json" }}
+            - v1-url-shortener-
+      - run:
+          name: Installing dependencies
+          command: |
+            cd ./client
+            npm install
+      - run:
+          name: Run test code
+          command: |
+            cd ./client
+            npm run test
+      - save_cache:
+          paths:
+            - ./client/node_modules
+          key: v1-url-shortener-{{ checksum "./client/package-lock.json" }}
+          when: on_success
+
+
+workflows:
+  build_and_test:
+    jobs:
+      - test_frontend:
+          filters:
+            branches:
+              only: master
