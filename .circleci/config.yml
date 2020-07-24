@@ -68,7 +68,7 @@ jobs:
       - run:
           name: Update ECS services to use the latest docker image
           command: |
-            aws ecs update-serice --cluster url-shortener --service $SERVICE_CLIENT --region $AWS_REGION --force-new-deployment
+            aws ecs update-service --cluster url-shortener --service $SERVICE_CLIENT --region $AWS_REGION --force-new-deployment
 
 
 workflows:
