@@ -66,7 +66,7 @@ jobs:
           aws-region: AWS_REGION
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
       - run:
-          name: Update ECS service to use the latest docker image
+          name: Update ECS services to use the latest docker image
           command: |
             aws ecs update-serice --cluster url-shortener --service $SERVICE_CLIENT --region $AWS_REGION --force-new-deployment
 
@@ -85,3 +85,4 @@ workflows:
       - deploy:
           requires:
             - publish_image
+          context: AWS
