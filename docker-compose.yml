@@ -49,10 +49,10 @@ services:
       - redis
 
   client:
-    image: panda1920/url-shortener-client-dev:latest
+    image: panda1920/url-shortener-client:latest
     build:
       context: ./client
-      dockerfile: build/Dockerfile.dev
+      dockerfile: build/Dockerfile
     container_name: url-shortener-client
     ports:
       - '8888:80'

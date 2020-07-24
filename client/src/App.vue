@@ -1,6 +1,7 @@
 <template>
   <div class='app'>
     <Header />
+    Foo Bar Baz
     <router-view></router-view>
     <Footer />
   </div>

@@ -1,6 +1,7 @@
 version: 2.1
 
-# orbs:
+orbs:
+  aws-cli: circleci/aws-cli
 
 executors:
   node_env:
@@ -54,14 +55,30 @@ jobs:
             docker push $IMAGENAME_FRONTEND
             docker push $IMAGENAME_BACKEND
 
+  deploy:
+    executor: aws-cli/default
+    environment:
+      SERVICE_CLIENT: url-shortener-client
+    steps:
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: Update ECS service to use the latest docker image
+          command: |
+            aws ecs update-serice --cluster url-shortener --service $SERVICE_CLIENT --region $AWS_REGION --force-new-deployment
+
 
 workflows:
   build_and_test:
     jobs:
-      - test_frontend:
-          filters:
-            branches:
-              only: master
-      - publish_image:
+      # - test_frontend:
+      #     filters:
+      #       branches:
+      #         only: master
+      - publish_image
+      # - publish_image:
+          # requires:
+          #   - test_frontend
+      - deploy:
           requires:
-            - test_frontend
+            - publish_image
