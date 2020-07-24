@@ -61,7 +61,10 @@ jobs:
       SERVICE_CLIENT: url-shortener-client
     steps:
       - aws-cli/install
-      - aws-cli/setup
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-region: AWS_REGION
+          aws-sercret-access-key: AWS_SECRET_ACCESS_KEY
       - run:
           name: Update ECS service to use the latest docker image
           command: |
