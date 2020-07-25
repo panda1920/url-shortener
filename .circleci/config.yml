@@ -58,7 +58,8 @@ jobs:
   deploy:
     executor: aws-cli/default
     environment:
-      SERVICE_CLIENT: url-shortener-client
+      SERVICE_FRONTEND: url-shortener-client
+      SERVICE_BACKEND: url-shortener-worker
     steps:
       - aws-cli/install
       - aws-cli/setup:
@@ -68,7 +69,8 @@ jobs:
       - run:
           name: Update ECS services to use the latest docker image
           command: |
-            aws ecs update-service --cluster url-shortener --service $SERVICE_CLIENT --region $AWS_REGION --force-new-deployment
+            aws ecs update-service --cluster url-shortener --service $SERVICE_FRONTEND --region $AWS_REGION --force-new-deployment
+            aws ecs update-service --cluster url-shortener --service $SERVICE_BACKEND --region $AWS_REGION --force-new-deployment
 
 
 workflows:

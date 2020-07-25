@@ -76,5 +76,9 @@ function createCompleteShortUrl(shortUrl: string): string {
   const host = process.env.SHORTURL_HOST || 'localhost';
   const port = process.env.SHORTURL_PORT || '8888';
   const path = process.env.SHORTURL_PATH || '/shorten';
-  return `${scheme}://${host}:${port}${path}/${shortUrl}`;
+
+  // want to avoid having host:port for production
+  const hostPort = (process.env.NODE_ENV === 'production') ? host : `${host}:${port}`;
+
+  return `${scheme}://${hostPort}${path}/${shortUrl}`;
 }
