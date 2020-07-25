@@ -3,10 +3,10 @@ import { get } from '@loopback/rest';
 export class HealthController {
   construcotr() {}
 
-  @get('/', {
+  @get('/health', {
     responses: {
       '200': {
-        description: 'Just a simple api endpoint to respond to HTTP GET healthchecks',
+        description: 'Endpoint intended to respond to HTTP GET healthchecks',
         content: { 'text/plain': { schema: { type: 'string' } } }
       }
     }
