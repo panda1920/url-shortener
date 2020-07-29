@@ -64,18 +64,18 @@ export class ShortenController {
 }
 
 function createDefaultRedirectUrl(): string {
-  const scheme = process.env.REDIRECT_DEFAULT_SCHEME || 'http';
-  const host = process.env.REDIRECT_DEFAULT_HOST || 'localhost';
-  const port = process.env.REDIRECT_DEFAULT_PORT || '8888';
-  const path = process.env.REDIRECT_DEFAULT_PATH || '/error';
+  const scheme = process.env.REDIRECT_DEFAULT_SCHEME ?? 'http';
+  const host = process.env.REDIRECT_DEFAULT_HOST ?? 'localhost';
+  const port = process.env.REDIRECT_DEFAULT_PORT ?? '8888';
+  const path = process.env.REDIRECT_DEFAULT_PATH ?? '/error';
   return `${scheme}://${host}:${port}${path}`;
 }
 
 function createCompleteShortUrl(short: string): string {
-  const scheme = process.env.SHORTURL_SCHEME || 'http';
-  const host = process.env.SHORTURL_HOST || 'localhost';
-  const port = process.env.SHORTURL_PORT || '8888';
-  const path = process.env.SHORTURL_PATH || '/shorten';
+  const scheme = process.env.SHORTURL_SCHEME ?? 'http';
+  const host = process.env.SHORTURL_HOST ?? 'localhost';
+  const port = process.env.SHORTURL_PORT ?? '8888';
+  const path = process.env.SHORTURL_PATH ?? '/shorten';
 
   // want to avoid having host:port notation for production
   const hostPort = (process.env.NODE_ENV === 'production') ? host : `${host}:${port}`;
