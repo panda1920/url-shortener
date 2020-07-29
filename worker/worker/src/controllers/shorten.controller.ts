@@ -8,7 +8,7 @@ import {
   getModelSchemaRef,
   requestBody,
   RestBindings,
-  Response
+  Response, HttpErrors
 } from '@loopback/rest';
 import {UrlMappingToShort} from '../models';
 import {UrlMappingToShortMongoRepository} from '../repositories';
@@ -18,6 +18,8 @@ import { authenticate } from '@loopback/authentication';
 import * as Mybindings from '../mybindings';
 import { ShortenService } from '../services/shorten.service';
 import * as Myspecs from './specs/request-reqponse';
+import { securityRequirement } from './specs/security';
+import { respondWithError } from './controller.utils';
 
 export class ShortenController {
   constructor(
@@ -29,6 +31,7 @@ export class ShortenController {
 
   @authenticate('jwt')
   @post('/shorten', {
+    security: [securityRequirement],
     responses: {
       '200': {
         description: 'UrlMappingToShort model instance',
@@ -41,9 +44,16 @@ export class ShortenController {
   async create(
     @requestBody(Myspecs.shortenRequestBodySpec)
     urlMappingToShort: { url: string; },
-  ): Promise<{ shortUrl: string; }> {
-    const short = await this.shortenService.shorten(urlMappingToShort.url);
-    return { shortUrl: createCompleteShortUrl(short) };
+    @inject(RestBindings.Http.RESPONSE) response: Response,
+  ): Promise<void> {
+    try {
+      const short = await this.shortenService.shorten(urlMappingToShort.url);
+      response.status(200).send({ shortUrl: createCompleteShortUrl(short) });
+    }
+    catch(e) {
+      respondWithError(response, e);
+    }
+
   }
 
   @get('/shorten/url/{short}', {
@@ -53,12 +63,16 @@ export class ShortenController {
     @inject(RestBindings.Http.RESPONSE) response: Response,
     @param.path.string('short') short: string,
   ) {
-    let url = await this.shortenService.expand(short);
-    if (!url)
-      response.redirect( createDefaultRedirectUrl() );
-    else {
+    try {
+      let url = await this.shortenService.expand(short);
+      if (!url)
+        throw new HttpErrors.NotFound('Such short url does not exist');
+
       url = url.startsWith('http') ? url: 'http://' + url;
       response.redirect(url);
+    }
+    catch(e) {
+      response.redirect( createDefaultRedirectUrl() );
     }
   }
 }

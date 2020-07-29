@@ -19,14 +19,20 @@ class MyUserService implements UserService<User, UserCredential> {
 
   async verifyCredentials(credential: UserCredential): Promise<User> {
     const foundUser = await this.mongoRepo.findOne({ where: { username: credential.username }});
-    if (!foundUser)
-      throw new HttpErrors.NotFound('Invalid username or password');
+    if (!foundUser) {
+      const error = new HttpErrors.NotFound('Username not found');
+      error.reason = 'username';
+      throw error;
+    }
 
     const passwordVerified = await this.passwordHasher.verifyPassword(
       credential.password, foundUser.password
     );
-    if (!passwordVerified)
-      throw new HttpErrors.NotFound('Invalid username or password');
+    if (!passwordVerified) {
+      const error = new HttpErrors.NotFound('Invalid password');
+      error.reason = 'password';
+      throw error;
+    }
 
     return foundUser;
   }

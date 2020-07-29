@@ -79,17 +79,34 @@ describe('testing behavior of user auth mixin', () => {
             expect(payload).toMatchObject({ token: TEST_DATA.RETURN_TOKEN });
         });
 
-        test('login should reject when api call failed', async () => {
+        test('login should reject to error object when api call fails', async () => {
+            const errorObject = { some_error: ' ' };
             window.fetch = jest.fn()
             .mockName('mocked fetch()')
             .mockImplementation(() => Promise.resolve({
                 ok: false,
                 status: 500,
+                json: () => Promise.resolve({ errorObject }),
             }));
     
             await expect(
                 login(TEST_DATA.USERNAME, TEST_DATA.PASSWORD)
-            ).rejects.toEqual(expect.any(String));
+            ).rejects.toEqual(errorObject);
+        });
+
+        test('login should reject to default error object when failed api call has no explicit error in response', async () => {
+            const defaultErrorObject = { reason: null, message: 'api call failed' };
+            window.fetch = jest.fn()
+            .mockName('mocked fetch()')
+            .mockImplementation(() => Promise.resolve({
+                ok: false,
+                status: 500,
+                json: () => Promise.resolve({ }),
+            }));
+    
+            await expect(
+                login(TEST_DATA.USERNAME, TEST_DATA.PASSWORD)
+            ).rejects.toEqual(defaultErrorObject);
         });
     });
 

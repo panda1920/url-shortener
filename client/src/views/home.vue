@@ -68,13 +68,12 @@
         }
 
         const response = await this.sendUrl();
-        if (response.ok) {
-          const { shortUrl } = await response.json();
+        const { shortUrl, errorObject } = await response.json();
+
+        if (response.ok)
           this.shortUrl = shortUrl;
-        }
-        else {
-          this.error = 'Failed to shorten url';
-        }
+        else
+          this.error = (errorObject !== undefined) ? errorObject.message : 'Failed to shorten url';
       },
 
       resetResult() {

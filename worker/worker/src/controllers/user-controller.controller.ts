@@ -15,6 +15,8 @@ import {
   put,
   del,
   requestBody,
+  Response,
+  RestBindings,
 } from '@loopback/rest';
 import {User} from '../models';
 import {UserRepository} from '../repositories';
@@ -29,6 +31,8 @@ import {
   loginRequestBodySpec,
   refreshResponseSpec
 } from './specs/request-reqponse';
+import { securityRequirement } from './specs/security';
+import { respondWithError } from './controller.utils';
 
 export class UserControllerController {
   constructor(
@@ -166,17 +170,25 @@ export class UserControllerController {
 
   @post('/users/login', { responses: loginResponseSpec })
   async login(
-    @requestBody(loginRequestBodySpec) credential: UserCredential
-  ): Promise<Token> {
-    const user = await this.userService.verifyCredentials(credential);
-    const profile = this.userService.convertToUserProfile(user);
-    const token = await this.tokenService.generateToken(profile);
-
-    return { token };
+    @requestBody(loginRequestBodySpec) credential: UserCredential,
+    @inject(RestBindings.Http.RESPONSE) response: Response,
+  ): Promise<void> {
+    try {
+      const user = await this.userService.verifyCredentials(credential);
+      const profile = this.userService.convertToUserProfile(user);
+      const token = await this.tokenService.generateToken(profile);
+      response.status(200).send({ token });
+    }
+    catch(e) {
+      respondWithError(response, e);
+    }
   }
 
   @authenticate('jwt')
-  @get('/users/refresh', { responses: refreshResponseSpec })
+  @get('/users/refresh', {
+    security: [securityRequirement],
+    responses: refreshResponseSpec
+  })
   async refresh(): Promise<Token> {
     const token = await this.tokenService.generateToken(this.currentProfile);
 

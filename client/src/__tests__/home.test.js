@@ -184,11 +184,13 @@ describe('testing behavior of Home component', () => {
         });
 
         test('making api call should update error when api was not successful', async () => {
+            const errorObject = { reason: 'something', message: 'something failed catastrophically' };
             const mockedFetch = jest.fn()
             .mockName('mocked fail fetch()')
             .mockImplementation(() => Promise.resolve({
                 ok: false,
                 status: 404,
+                json: () => Promise.resolve({ errorObject }),
             }));
             window.fetch = mockedFetch;
 
@@ -197,7 +199,26 @@ describe('testing behavior of Home component', () => {
             await mountedComponent.vm.$nextTick();
             await mountedComponent.vm.$nextTick();
 
-            expect(mountedComponent.vm.$data.error).not.toBe('');
+            expect(mountedComponent.vm.$data.error).toBe(errorObject.message);
+        });
+
+        test('making api call should update error with default message when failed api call did not return error', async () => {
+            const defaultErrorMsg = 'Failed to shorten url';
+            const mockedFetch = jest.fn()
+            .mockName('mocked fail fetch()')
+            .mockImplementation(() => Promise.resolve({
+                ok: false,
+                status: 404,
+                json: () => Promise.resolve({}),
+            }));
+            window.fetch = mockedFetch;
+
+            mountedComponent.get('#url').setValue('www.google.com');
+            await mountedComponent.get('#shorten-button').trigger('click');
+            await mountedComponent.vm.$nextTick();
+            await mountedComponent.vm.$nextTick();
+
+            expect(mountedComponent.vm.$data.error).toBe(defaultErrorMsg);
         });
 
         

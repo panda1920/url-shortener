@@ -43,6 +43,22 @@ export class WorkerApplication extends BootMixin(
     });
     this.component(RestExplorerComponent);
 
+    // https://swagger.io/specification/
+    this.api({
+      openapi: '3.0.0',
+      info: { title: 'url-shortener', version: '1.0.0' },
+      paths: {},
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "JWT",
+          }
+        }
+      }
+    });
+
     // add authenticaiton
     this.component(AuthenticationComponent);
     registerAuthenticationStrategy(this, JwtStrategy);

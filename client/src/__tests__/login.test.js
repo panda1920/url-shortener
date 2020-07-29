@@ -183,9 +183,10 @@ describe('testing behavior of Login component', () => {
         });
 
         test('failed api call should show error', async () => {
+            const errorMsg = 'test_error';
             const mockLogin = jest.fn()
                 .mockName('mocked login()')
-                .mockImplementation(() => { throw 'api call failed'; });
+                .mockImplementation(() => { throw { reason: null, message: errorMsg }; });
             wrapper = mountLogin({ 
                 mixins: [{ methods: { login: mockLogin } }]
             });
@@ -195,7 +196,7 @@ describe('testing behavior of Login component', () => {
             await wrapper.vm.$nextTick();
             await wrapper.vm.$nextTick();
 
-            expect(wrapper.vm.$data.error).not.toBe('');
+            expect(wrapper.vm.$data.error).toBe(errorMsg);
         });
 
         test('clicking on login with valid userinput should reset error state', async () => {

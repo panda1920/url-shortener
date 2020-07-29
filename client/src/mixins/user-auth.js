@@ -12,12 +12,14 @@ const userAuthMixin = {
     methods: {
         async login(username, password) {
             const response = await sendLoginRequest(username, password);
-
+            console.log(response);
+            const { token, errorObject } = await response.json();
+            
             if (!response.ok) {
-                throw 'api call failed';
+                const defaultErrorObject = { reason: null, message: 'api call failed' };
+                throw (errorObject !== undefined) ? errorObject : defaultErrorObject;
             }
 
-            const { token } = await response.json();
             this.$store.commit('storeToken', { token });
         },
 

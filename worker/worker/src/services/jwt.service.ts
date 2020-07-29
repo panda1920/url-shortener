@@ -23,7 +23,8 @@ class JwtService implements TokenService {
       return profile;
     }
     catch (error) {
-      throw new HttpErrors.Unauthorized(`Failed to authenticate: ${error}`);
+      console.info(`Failed to authenticate: ${error}`);
+      throw new HttpErrors.Unauthorized(`Failed to authenticate`);
     }
   }
 

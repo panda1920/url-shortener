@@ -67,7 +67,7 @@
           this.$router.push('/');
         }
         catch (e) {
-          this.error = e;
+          this.error = e.message;
         }
       },
 
