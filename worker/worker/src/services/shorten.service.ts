@@ -8,7 +8,7 @@ import { UrlMappingToShort } from '../models/url-mapping-to-short.model';
 
 export interface ShortenService {
   shorten(url: string): Promise<string>;
-  expand(shortUrl: string): Promise<string | null>;
+  expand(short: string): Promise<string | null>;
 };
 
 // implemented interactions with cache/persistent storage
@@ -19,48 +19,60 @@ abstract class ShortenServiceStoreImplemented implements ShortenService {
   ) {}
 
   abstract shorten(url: string): Promise<string>;
-  abstract expand(shortUrl: string): Promise<string | null>;
+  abstract expand(short: string): Promise<string | null>;
 
-  protected async saveSafe(url: string, shortUrl: string): Promise<void> {
-    await this.save(url, shortUrl);
-    const savedUrl = await this.loadUrl(shortUrl);
+  protected async saveSafe(url: string, short: string): Promise<void> {
+    await this.save(url, short);
+    await this.confirmSaveSuccess(url, short);
+  }
+
+  private async save(url: string, short: string): Promise<void> {
+    const newMapping = this.createMapping(url, short);
+    await this.saveToDB(newMapping);
+    await this.saveToCache(short, newMapping);
+  }
+
+  private createMapping(url: string, short: string): UrlMappingToShort {
+    return new UrlMappingToShort({ url, short });
+  }
+
+  private async saveToDB(mapping: UrlMappingToShort): Promise<void> {
+    await this.mongoRepository.save(mapping);
+  }
+
+  private async saveToCache(short: string, mapping: UrlMappingToShort): Promise<void> {
+    await this.redisRepository.set(short, mapping);
+  }
+
+  private async confirmSaveSuccess(url: string, short: string): Promise<void> {
+    const savedUrl = await this.loadUrl(short);
 
     if (savedUrl === null) {
-      console.error(`Failed to shorten url. ${url} -> ${shortUrl}`);
+      console.error(`Failed to shorten url. ${url} -> ${short}`);
       throw new HttpErrors[500]('Failed to shorten url');
     }
     
     const saveSuccesful = savedUrl === url;
     if (!saveSuccesful) {
-      console.error(`Detected conflict. ${shortUrl} : ${savedUrl} | ${url}`);
+      console.error(`Detected conflict. ${short} : ${savedUrl} | ${url}`);
       throw new HttpErrors[500]('Failed to shorten url');
     }
   }
 
-  protected async save(url: string, shortUrl: string): Promise<void> {
-    const newMapping = new UrlMappingToShort({ url, shortUrl });
-    await this.mongoRepository.save(newMapping);
-    await this.saveCache(url, shortUrl);
-  }
-
-  protected async saveCache(url: string, shortUrl: string): Promise<void> {
-    const newMapping = new UrlMappingToShort({ url, shortUrl });
-    await this.redisRepository.set(shortUrl, newMapping);
-  }
-
-  protected async loadUrl(shortUrl: string): Promise<string | null> {
+  protected async loadUrl(short: string): Promise<string | null> {
     // get data from cache first
-    const response = await this.redisRepository.get(shortUrl);
+    const response = await this.redisRepository.get(short);
     if (response)
       return response.url;
     
-    // only get from mongoo when cache miss
-    const result  = await this.mongoRepository.find({ where: { shortUrl }})
+    // only reach for mongo when cache miss
+    const result  = await this.mongoRepository.find({ where: { short }})
     if (result.length < 1)
       return null;
       
-    this.saveCache(result[0].url, shortUrl);
-    return result[0].url;
+    const url = result[0].url;
+    this.saveToCache(short, this.createMapping(url, short));
+    return url;
   }
 
   protected async loadShort(url: string): Promise<string | null> {
@@ -68,7 +80,7 @@ abstract class ShortenServiceStoreImplemented implements ShortenService {
     if (result.length < 1)
       return null;
 
-    return result[0].shortUrl;
+    return result[0].short;
   }
 }
 
@@ -89,36 +101,36 @@ export class HashShortenService extends ShortenServiceStoreImplemented {
   }
 
   async shorten(url: string): Promise<string> {
-    let shortUrl = await this.loadShort(url);
-    if (!shortUrl)
-      shortUrl = await this.generateShort(url);
+    let short = await this.loadShort(url);
+    if (!short)
+      short = await this.generateShort(url);
 
-    return shortUrl;
+    return short;
   }
 
-  async expand(shortUrl: string): Promise<string | null> {
-    return await this.loadUrl(shortUrl);
+  async expand(short: string): Promise<string | null> {
+    return await this.loadUrl(short);
   }
 
   private async generateShort(url: string): Promise<string> {
     const trimmedHash = md5(url).slice(0, this.BITS_USED / 4);
     const decimalRepresentation = parseInt(trimmedHash, 16);
-    const shortUrl = this.convertNumberToShortUrl(decimalRepresentation);
-    await this.saveSafe(url, shortUrl);
+    const short = this.convertNumberToShort(decimalRepresentation);
+    await this.saveSafe(url, short);
 
-    return shortUrl;
+    return short;
   }
 
-  private convertNumberToShortUrl(n: number) {
+  private convertNumberToShort(n: number) {
     const base = this.CHARACTERS_USED.length;
-    let shortUrl = '';
+    let short = '';
     
     while (n > 0) {
       const remainder = n % base;
-      shortUrl = this.CHARACTERS_USED.charAt(remainder) + shortUrl;
+      short = this.CHARACTERS_USED.charAt(remainder) + short;
       n = Math.floor(n / base);
     }
 
-    return shortUrl;
+    return short;
   }
 }

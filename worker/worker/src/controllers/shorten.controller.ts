@@ -42,18 +42,18 @@ export class ShortenController {
     @requestBody(Myspecs.shortenRequestBodySpec)
     urlMappingToShort: { url: string; },
   ): Promise<{ shortUrl: string; }> {
-    const shortUrl = await this.shortenService.shorten(urlMappingToShort.url);
-    return { shortUrl: createCompleteShortUrl(shortUrl) };
+    const short = await this.shortenService.shorten(urlMappingToShort.url);
+    return { shortUrl: createCompleteShortUrl(short) };
   }
 
-  @get('/shorten/url/{shortUrl}', {
+  @get('/shorten/url/{short}', {
     responses: { '301': { description: 'Redirecting provided path to real url' } }
   })
   async redirect(
     @inject(RestBindings.Http.RESPONSE) response: Response,
-    @param.path.string('shortUrl') shortUrl: string,
+    @param.path.string('short') short: string,
   ) {
-    let url = await this.shortenService.expand(shortUrl);
+    let url = await this.shortenService.expand(short);
     if (!url)
       response.redirect( createDefaultRedirectUrl() );
     else {
@@ -71,14 +71,14 @@ function createDefaultRedirectUrl(): string {
   return `${scheme}://${host}:${port}${path}`;
 }
 
-function createCompleteShortUrl(shortUrl: string): string {
+function createCompleteShortUrl(short: string): string {
   const scheme = process.env.SHORTURL_SCHEME || 'http';
   const host = process.env.SHORTURL_HOST || 'localhost';
   const port = process.env.SHORTURL_PORT || '8888';
   const path = process.env.SHORTURL_PATH || '/shorten';
 
-  // want to avoid having host:port for production
+  // want to avoid having host:port notation for production
   const hostPort = (process.env.NODE_ENV === 'production') ? host : `${host}:${port}`;
 
-  return `${scheme}://${hostPort}${path}/${shortUrl}`;
+  return `${scheme}://${hostPort}${path}/${short}`;
 }

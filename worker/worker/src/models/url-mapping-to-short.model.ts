@@ -20,7 +20,7 @@ export class UrlMappingToShort extends Entity {
     type: 'string',
     required: true,
   })
-  shortUrl: string;
+  short: string;
 
 
   constructor(data?: Partial<UrlMappingToShort>) {

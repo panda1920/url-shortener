@@ -178,7 +178,7 @@ describe('testing behavior of Home component', () => {
             // callback to the button is async
             // making api call is async
             // opening json of response is async
-        // therefore need 3 nextTick total (including imlicit one in trigger())
+            // therefore need 3 nextTick total (including imlicit one in trigger())
 
             expect(mountedComponent.vm.$data.shortUrl).toBe(TEST_DATA.returnedShortened);
         });
