@@ -224,16 +224,70 @@ describe('testing behavior of Login component', () => {
                 expect(wrapper.vm.$data.error).not.toBe('');
             }
         });
-
-        async function setInput(wrapper, input = {}) {
-            let { username, password } = input;
-            username = username !== undefined ? username : 'default_user@example.com';
-            password = password !== undefined ? password : 'default_password';
-
-            wrapper.get('#input-username').setValue(username);
-            await wrapper.get('#input-username').trigger('input');
-            wrapper.get('#input-password').setValue(password);
-            await wrapper.get('#input-password').trigger('input');
-        }
     });
+
+    describe('bad inputs with reason', () => {
+        // want to check for state of component
+        test('bad input states starts off false', () => {
+            expect(wrapper.vm.$data.badUsername).toBe(false);
+            expect(wrapper.vm.$data.badPassword).toBe(false);
+        });
+
+        test('when login is invalid and username is the reason, badUsername flag should be true', async () => {
+            const mockLogin = jest.fn()
+                .mockName('mocked login()')
+                .mockImplementation(() => { throw { reason: 'username', message: 'some_error' }; });
+            wrapper = mountLogin({ 
+                mixins: [{ methods: { login: mockLogin } }]
+            });
+
+            await setInput(wrapper);
+            await wrapper.get('#button-login').trigger('click');
+            await wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.vm.$data.badUsername).toBe(true);
+            expect(wrapper.vm.$data.badPassword).toBe(false);
+        });
+        
+        test('when login is invalid and password is the reason, badPassword flag should be true', async () => {
+            const mockLogin = jest.fn()
+                .mockName('mocked login()')
+                .mockImplementation(() => { throw { reason: 'password', message: 'some_error' }; });
+            wrapper = mountLogin({ 
+                mixins: [{ methods: { login: mockLogin } }]
+            });
+
+            await setInput(wrapper);
+            await wrapper.get('#button-login').trigger('click');
+            await wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.vm.$data.badUsername).toBe(false);
+            expect(wrapper.vm.$data.badPassword).toBe(true);
+        });
+        
+        test('clicking on login with valid input should remove bad flags', async () => {
+            wrapper.setData({ badUsername: true, badPassword: true });
+
+            await setInput(wrapper);
+            await wrapper.get('#button-login').trigger('click');
+            await wrapper.vm.$nextTick();
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.vm.$data.badUsername).toBe(false);
+            expect(wrapper.vm.$data.badPassword).toBe(false);
+        });
+    });
+
+    async function setInput(wrapper, input = {}) {
+        let { username, password } = input;
+        username = username !== undefined ? username : 'default_user@example.com';
+        password = password !== undefined ? password : 'default_password';
+
+        wrapper.get('#input-username').setValue(username);
+        await wrapper.get('#input-username').trigger('input');
+        wrapper.get('#input-password').setValue(password);
+        await wrapper.get('#input-password').trigger('input');
+    }
 });

@@ -69,6 +69,10 @@
     border-color: $secondary-color;
   }
 
+  input.input-error {
+    border-color: red !important;
+  }
+
 </style>
 
 <style lang='scss' scoped>

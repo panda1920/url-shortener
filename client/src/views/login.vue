@@ -9,6 +9,7 @@
         <input
           id='input-username'
           v-model='username'
+          :class='{ "input-error": badUsername }'
           type='text'
         >
 
@@ -16,6 +17,7 @@
         <input
           id='input-password'
           v-model='password'
+          :class='{ "input-error": badPassword }'
           type='password'
         >
       </div>
@@ -48,6 +50,8 @@
       error: '',
       username: '',
       password: '',
+      badUsername: false,
+      badPassword: false,
     }),
 
     computed: {
@@ -58,17 +62,22 @@
 
     methods: {
       async loginHandler() {
-        this.error = '';
-        if (!this.validateInput())
-          return;
+        this.resetError();
 
         try {
+          this.validateInput();
           await this.login(this.username, this.password);
           this.$router.push('/');
         }
         catch (e) {
-          this.error = e.message;
+          this.handleError(e);
         }
+      },
+
+      resetError() {
+        this.error = '';
+        this.badUsername = false;
+        this.badPassword = false;
       },
 
       validateInput() {
@@ -76,12 +85,23 @@
         const passwordPattern = /^\S+$/;
 
         if (!usernamePattern.test(this.username))
-          this.error = 'Username must be a valid email address';
+          throw { reason: 'username', message: 'Username must be a valid email address' };
         else if (!passwordPattern.test(this.password))
-          this.error = 'Password must not be empty';
-
-        return this.error === '';
+          throw { reason: 'password', message: 'Password must not be empty' };
       },
+
+      handleError(e) {
+        this.error = e.message;
+
+        switch(e.reason) {
+          case 'username':
+            this.badUsername = true; break;
+          case 'password':
+            this.badPassword = true; break;
+          default:
+            break;
+        }
+      }
     },
   };
 </script>
