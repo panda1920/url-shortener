@@ -103,7 +103,7 @@
             'Content-Type': 'application/json',
             Authorization: `Bearer ${this.token}`,
           },
-          body: JSON.stringify({ url: this.url }),
+          body: JSON.stringify({ url: this.url.trim() }),
         });
       },
 

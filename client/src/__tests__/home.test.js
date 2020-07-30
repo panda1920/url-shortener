@@ -170,6 +170,16 @@ describe('testing behavior of Home component', () => {
             expect(JSON.parse(options.body)).toMatchObject({ url });
         });
 
+        test('clicking on shorten should make api call with trimmed url', async () => {
+            const url = '  www.google.com  ';
+            
+            await shortenUrlAction(url);
+
+            expect(mockedFetch).toHaveBeenCalledTimes(1);
+            const [_, options] = mockedFetch.mock.calls[0];
+            expect(JSON.parse(options.body)).toMatchObject({ url: url.trim() });
+        });
+
         test('making api call should update shortUrl component state if successful', async () => {
             await shortenUrlAction();
 
