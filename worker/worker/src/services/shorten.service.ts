@@ -1,6 +1,7 @@
 import { repository } from '@loopback/repository';
 import { HttpErrors } from '@loopback/rest';
 import md5 from 'md5';
+import validUrl from 'valid-url';
 
 import { UrlMappingToShortRedisRepository } from '../repositories/url-mapping-to-short-redis.repository';
 import { UrlMappingToShortMongoRepository } from '../repositories/url-mapping-to-short-mongo.repository';
@@ -82,6 +83,26 @@ abstract class ShortenServiceStoreImplemented implements ShortenService {
 
     return result[0].short;
   }
+
+  // implementation of validation/normalization helpers
+
+  protected validateUrl(url: string): void {
+    if (validUrl.isWebUri(url))
+      return;
+
+    const error = new HttpErrors[400]('Invalid url');
+    error.reason = 'url';
+    throw error;
+  }
+
+  protected normalizeUrl(url: string): string {
+    return this.hasScheme(url) ? url : 'http://' + url;
+  }
+
+  private hasScheme(url: string): boolean {
+    const schemePattern = /^[a-zA-Z]+:\/\/.*/g;
+    return schemePattern.exec(url) !== null;
+  }
 }
 
 // one implementation of shortening algorithm
@@ -101,9 +122,12 @@ export class HashShortenService extends ShortenServiceStoreImplemented {
   }
 
   async shorten(url: string): Promise<string> {
-    let short = await this.loadShort(url);
+    const normalized = this.normalizeUrl(url);
+    this.validateUrl(normalized);
+
+    let short = await this.loadShort(normalized);
     if (!short)
-      short = await this.generateShort(url);
+      short = await this.generateShort(normalized);
 
     return short;
   }
@@ -113,8 +137,8 @@ export class HashShortenService extends ShortenServiceStoreImplemented {
   }
 
   private async generateShort(url: string): Promise<string> {
-    const trimmedHash = md5(url).slice(0, this.BITS_USED / 4);
-    const decimalRepresentation = parseInt(trimmedHash, 16);
+    const truncatedHashedUrl = md5(url).slice(0, this.BITS_USED / 4);
+    const decimalRepresentation = parseInt(truncatedHashedUrl, 16);
     const short = this.convertNumberToShort(decimalRepresentation);
     await this.saveSafe(url, short);
 

@@ -12,7 +12,6 @@ const userAuthMixin = {
     methods: {
         async login(username, password) {
             const response = await sendLoginRequest(username, password);
-            console.log(response);
             const { token, errorObject } = await response.json();
             
             if (!response.ok) {

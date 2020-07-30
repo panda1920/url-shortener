@@ -57,7 +57,7 @@ export class ShortenController {
   }
 
   @get('/shorten/url/{short}', {
-    responses: { '301': { description: 'Redirecting provided path to real url' } }
+    responses: { '301': { description: 'Redirecting provided short to real url' } }
   })
   async redirect(
     @inject(RestBindings.Http.RESPONSE) response: Response,
@@ -68,7 +68,6 @@ export class ShortenController {
       if (!url)
         throw new HttpErrors.NotFound('Such short url does not exist');
 
-      url = url.startsWith('http') ? url: 'http://' + url;
       response.redirect(url);
     }
     catch(e) {
