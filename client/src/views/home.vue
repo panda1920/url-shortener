@@ -14,6 +14,7 @@
         <input
           id='url'
           v-model='url'
+          :class='{ "input-error": badUrl }'
           type='text'
           placeholder='Shorten url'
           @keydown.enter.prevent='shorten'
@@ -51,41 +52,51 @@
       error: '',
       url: '',
       shortUrl: '',
+      badUrl: false,
     }),
 
     methods: {
       async shorten() {
         this.resetResult();
 
-        if (!this.isAuthenticated) {
-          this.error = 'You must be logged in to use our service';
-          return;
+        try {
+          this.validateUrl();
+          this.verifyAuthenticated();
+          this.shortUrl  = await this.shortenUrl();
         }
-
-        if (!this.validateUrl()) {
-          this.error = 'Enter a valid url';
-          return;
+        catch(e) {
+          this.handleError(e);
         }
-
-        const response = await this.sendUrl();
-        const { shortUrl, errorObject } = await response.json();
-
-        if (response.ok)
-          this.shortUrl = shortUrl;
-        else
-          this.error = (errorObject !== undefined) ? errorObject.message : 'Failed to shorten url';
       },
 
       resetResult() {
         this.error = '';
         this.shortUrl = '';
+        this.badUrl = false;
       },
       
       validateUrl() {
-        return this.url.match(/^\s*$/) === null;
+        if (this.url.match(/^\s*$/))
+          throw { reason: 'url', message: 'Invalid url' };
       },
 
-      async sendUrl() {
+      verifyAuthenticated() {
+        if (!this.isAuthenticated)
+          throw { reason: null, message: 'You must be logged in to use our service' };
+      },
+
+      async shortenUrl() {
+        const response = await this.sendUrlToShortenApi();
+        const { shortUrl, errorObject } = await response.json();
+
+        if (response.ok)
+          return shortUrl;
+
+        const defaultErrorObject = { reason: null, message: 'Failed to shorten url' };
+        throw (errorObject !== undefined) ? errorObject : defaultErrorObject;
+      },
+
+      sendUrlToShortenApi() {
         return window.fetch(process.env.API_PATH + '/shorten', {
           method: 'POST',
           headers: {
@@ -94,6 +105,18 @@
           },
           body: JSON.stringify({ url: this.url }),
         });
+      },
+
+      handleError(e) {
+        this.error = e.message;
+
+        switch(e.reason) {
+          case 'url':
+            this.badUrl = true;
+            break;
+          default:
+            break;
+        }
       },
 
       async copyToClipboard() {

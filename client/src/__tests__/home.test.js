@@ -171,14 +171,7 @@ describe('testing behavior of Home component', () => {
         });
 
         test('making api call should update shortUrl component state if successful', async () => {
-            mountedComponent.get('#url').setValue('www.google.com');
-            await mountedComponent.get('#shorten-button').trigger('click');
-            await mountedComponent.vm.$nextTick();
-            await mountedComponent.vm.$nextTick();
-            // callback to the button is async
-            // making api call is async
-            // opening json of response is async
-            // therefore need 3 nextTick total (including imlicit one in trigger())
+            await shortenUrlAction();
 
             expect(mountedComponent.vm.$data.shortUrl).toBe(TEST_DATA.returnedShortened);
         });
@@ -194,10 +187,7 @@ describe('testing behavior of Home component', () => {
             }));
             window.fetch = mockedFetch;
 
-            mountedComponent.get('#url').setValue('www.google.com');
-            await mountedComponent.get('#shorten-button').trigger('click');
-            await mountedComponent.vm.$nextTick();
-            await mountedComponent.vm.$nextTick();
+            await shortenUrlAction();
 
             expect(mountedComponent.vm.$data.error).toBe(errorObject.message);
         });
@@ -213,10 +203,7 @@ describe('testing behavior of Home component', () => {
             }));
             window.fetch = mockedFetch;
 
-            mountedComponent.get('#url').setValue('www.google.com');
-            await mountedComponent.get('#shorten-button').trigger('click');
-            await mountedComponent.vm.$nextTick();
-            await mountedComponent.vm.$nextTick();
+            await shortenUrlAction();
 
             expect(mountedComponent.vm.$data.error).toBe(defaultErrorMsg);
         });
@@ -225,10 +212,7 @@ describe('testing behavior of Home component', () => {
         test('clicking on shorten button should reset error', async () => {
             mountedComponent.setData({ error: 'some_value' });
             
-            mountedComponent.get('#url').setValue('www.google.com');
-            await mountedComponent.get('#shorten-button').trigger('click');
-            await mountedComponent.vm.$nextTick();
-            await mountedComponent.vm.$nextTick();
+            await shortenUrlAction();
 
             expect(mountedComponent.vm.$data.error).toBe('');
         });
@@ -236,10 +220,7 @@ describe('testing behavior of Home component', () => {
         test('clicking on shorten button should reset shortUrl', async () => {
             mountedComponent.setData({ shortUrl: 'some_value' });
             
-            mountedComponent.get('#url').setValue('');
-            await mountedComponent.get('#shorten-button').trigger('click');
-            await mountedComponent.vm.$nextTick();
-            await mountedComponent.vm.$nextTick();
+            await shortenUrlAction('');
 
             expect(mountedComponent.vm.$data.shortUrl).toBe('');
         });
@@ -265,4 +246,58 @@ describe('testing behavior of Home component', () => {
             expect(mountedComponent.vm.$data.error).not.toBe('');
         });
     });
+
+    describe('bad input state', () => {
+        test('when created badUrl state should be false', () => {
+            expect(mountedComponent.vm.$data.badUrl).toBe(false);
+        });
+        test('when fetch returns error with url as reason, badUrl should become true', async () => {
+            const errorObject = { reason: 'url', message: 'some url error' };
+            const mockedFetch = jest.fn()
+            .mockName('mocked fail fetch()')
+            .mockImplementation(() => Promise.resolve({
+                ok: false,
+                status: 404,
+                json: () => Promise.resolve({ errorObject }),
+            }));
+            window.fetch = mockedFetch;
+
+            await shortenUrlAction();
+
+            expect(mountedComponent.vm.$data.badUrl).toBe(true);
+        });
+        test('when fetch returns error with different reason, badUrl should stay false', async () => {
+            const errorObject = { reason: 'something', message: 'some error' };
+            const mockedFetch = jest.fn()
+            .mockName('mocked fail fetch()')
+            .mockImplementation(() => Promise.resolve({
+                ok: false,
+                status: 404,
+                json: () => Promise.resolve({ errorObject }),
+            }));
+            window.fetch = mockedFetch;
+
+            await shortenUrlAction();
+
+            expect(mountedComponent.vm.$data.badUrl).toBe(false);
+        });
+        test('when shorten is successfully processed, badUrl state should become false', async () => {
+            mountedComponent.setData({ badUrl: true });
+
+            await shortenUrlAction();
+
+            expect(mountedComponent.vm.$data.badUrl).toBe(false);
+        });
+    });
+
+    async function shortenUrlAction(url = 'www.google.com') {
+        mountedComponent.get('#url').setValue(url);
+        await mountedComponent.get('#shorten-button').trigger('click');
+        await mountedComponent.vm.$nextTick();
+        await mountedComponent.vm.$nextTick();
+        // callback to the button is async
+        // making api call is async
+        // opening json of response is async
+        // therefore need 3 nextTick total (including imlicit one in trigger())
+    }
 });

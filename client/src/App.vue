@@ -63,15 +63,21 @@
     background-color: white;
   }
 
+  input.input-error {
+    border-color: $error-color;
+    background-color: lighten($error-color, 30%);
+
+    &:focus {
+      border-color: $error-color;
+    }
+  }
+
   button {
     cursor: pointer;
     background-color: $secondary-color;
     border-color: $secondary-color;
   }
 
-  input.input-error {
-    border-color: red !important;
-  }
 
 </style>
 

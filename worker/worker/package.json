@@ -52,13 +52,15 @@
     "@types/jsonwebtoken": "^8.5.0",
     "@types/md5": "^2.2.0",
     "@types/uuid": "^8.0.0",
+    "@types/valid-url": "^1.0.3",
     "bcrypt": "^5.0.0",
     "jsonwebtoken": "^8.5.1",
     "loopback-connector-kv-redis": "^3.0.3",
     "loopback-connector-mongodb": "^4.2.0",
     "md5": "^2.2.1",
     "tslib": "^1.10.0",
-    "uuid": "^8.1.0"
+    "uuid": "^8.1.0",
+    "valid-url": "^1.0.9"
   },
   "devDependencies": {
     "@loopback/build": "^5.0.1",
