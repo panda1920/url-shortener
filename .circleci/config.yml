@@ -43,10 +43,9 @@ jobs:
       - setup_remote_docker
       - run:
           name: Build image
-          # change below command to run build:docker for production build
           command: |
             cd ./client
-            npm run build:dev
+            npm run build:dockerdev
             cd ../worker/worker
             npm run docker:build
       - run:

@@ -9,6 +9,7 @@
     "build": "webpack --env.NODE_ENV=production --config ./build/webpack.config.js",
     "build:dev": "webpack --env.NODE_ENV=development --config ./build/webpack.config.js",
     "build:docker": "docker image build --no-cache --pull -f ./build/Dockerfile -t panda1920/url-shortener-client:latest .",
+    "build:dockerdev": "docker image build --no-cache --pull -f ./build/Dockerfile.dev -t panda1920/url-shortener-client:latest .",
     "dev": "webpack-dev-server --env.NODE_ENV=development --config ./build/webpack.config.js"
   },
   "keywords": [],
