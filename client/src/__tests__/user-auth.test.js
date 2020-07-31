@@ -81,13 +81,11 @@ describe('testing behavior of user auth mixin', () => {
 
         test('login should reject to error object when api call fails', async () => {
             const errorObject = { some_error: ' ' };
-            window.fetch = jest.fn()
-            .mockName('mocked fetch()')
-            .mockImplementation(() => Promise.resolve({
+            useCustomFetchImplementation({
                 ok: false,
                 status: 500,
                 json: () => Promise.resolve({ errorObject }),
-            }));
+            });
     
             await expect(
                 login(TEST_DATA.USERNAME, TEST_DATA.PASSWORD)
@@ -96,17 +94,47 @@ describe('testing behavior of user auth mixin', () => {
 
         test('login should reject to default error object when failed api call has no explicit error in response', async () => {
             const defaultErrorObject = { reason: null, message: 'api call failed' };
-            window.fetch = jest.fn()
-            .mockName('mocked fetch()')
-            .mockImplementation(() => Promise.resolve({
+            useCustomFetchImplementation({
                 ok: false,
                 status: 500,
-                json: () => Promise.resolve({ }),
-            }));
+                json: () => Promise.resolve({})
+            });
     
             await expect(
                 login(TEST_DATA.USERNAME, TEST_DATA.PASSWORD)
             ).rejects.toEqual(defaultErrorObject);
+        });
+
+        test('login should reject error object extracted from loopback error', async () => {
+            const loopBackError = { message: 'api call failed' };
+            useCustomFetchImplementation({
+                ok: false,
+                status: 500,
+                json: () => Promise.resolve({ error: loopBackError })
+            });
+
+            await expect(
+                login(TEST_DATA.USERNAME, TEST_DATA.PASSWORD)
+            ).rejects.toEqual({ reason: null, message: loopBackError.message });
+        });
+
+        test('login should reject error object extracted from loopback error with details', async () => {
+            const loopBackError = {
+                message: 'api call failed',
+                details: [{
+                    message: 'error_detail',
+                    path: '/password'
+                }]
+            };
+            useCustomFetchImplementation({
+                ok: false,
+                status: 500,
+                json: () => Promise.resolve({ error: loopBackError })
+            });
+
+            await expect(
+                login(TEST_DATA.USERNAME, TEST_DATA.PASSWORD)
+            ).rejects.toEqual({ reason: 'password', message: loopBackError.details[0].message });
         });
     });
 
@@ -189,12 +217,7 @@ describe('testing behavior of user auth mixin', () => {
         });
 
         test('if refresh to backend fails as unauthorized, purge token on store', async () => {
-            window.fetch = jest.fn()
-            .mockName('mocked fetch()')
-            .mockImplementation(() => Promise.resolve({
-                ok: false,
-                status: 401,
-            }));
+            useCustomFetchImplementation({ ok: false, status: 401 });
 
             await refresh();
 
@@ -204,12 +227,7 @@ describe('testing behavior of user auth mixin', () => {
         });
 
         test('if refresh fails by some other reason, registers another refresh 30 seconds from now', async () => {
-            window.fetch = jest.fn()
-            .mockName('mocked fetch()')
-            .mockImplementation(() => Promise.resolve({
-                ok: false,
-                status: 504,
-            }));
+            useCustomFetchImplementation({ ok: false, status: 504 });
             const timeout = jest.spyOn(window, 'setTimeout');
 
             await refresh();
@@ -257,3 +275,11 @@ describe('testing behavior of user auth mixin', () => {
         });
     });
 });
+
+// helpers
+
+function useCustomFetchImplementation(responseProperties) {
+    window.fetch = jest.fn()
+        .mockName('mocked fetch()')
+        .mockImplementation(() => Promise.resolve(responseProperties));
+}

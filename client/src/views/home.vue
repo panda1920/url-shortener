@@ -112,8 +112,7 @@
 
         switch(e.reason) {
           case 'url':
-            this.badUrl = true;
-            break;
+            this.badUrl = true; break;
           default:
             break;
         }

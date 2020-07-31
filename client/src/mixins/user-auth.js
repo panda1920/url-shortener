@@ -1,3 +1,5 @@
+import { extractErrorObject } from './api-helper';
+
 const userAuthMixin = {
     computed: {
         isAuthenticated() {
@@ -12,14 +14,15 @@ const userAuthMixin = {
     methods: {
         async login(username, password) {
             const response = await sendLoginRequest(username, password);
-            const { token, errorObject } = await response.json();
+            const responseJson = await response.json();
             
             if (!response.ok) {
                 const defaultErrorObject = { reason: null, message: 'api call failed' };
-                throw (errorObject !== undefined) ? errorObject : defaultErrorObject;
+                const errorObject = await extractErrorObject(responseJson);
+                throw errorObject ? errorObject : defaultErrorObject;
             }
 
-            this.$store.commit('storeToken', { token });
+            this.$store.commit('storeToken', { token: responseJson.token });
         },
 
         async logout() {
