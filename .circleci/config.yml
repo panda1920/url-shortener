@@ -45,7 +45,8 @@ jobs:
           name: Build image
           command: |
             cd ./client
-            npm run build:docker
+            npm run build:dev
+# npm run build:docker
             cd ../worker/worker
             npm run docker:build
       - run:

@@ -76,6 +76,7 @@
     cursor: pointer;
     background-color: $secondary-color;
     border-color: $secondary-color;
+    font-weight: 550;
   }
 
 

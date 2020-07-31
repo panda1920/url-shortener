@@ -127,6 +127,7 @@ describe('testing behavior of Login component', () => {
                 { username: ' ', password: 'password' },
                 { username: 'admin@example.com', password: '' },
                 { username: 'admin@example.com', password: ' ' },
+                { username: 'admin@example.com', password: ' password ' },
                 { username: 'not_email', password: 'password' },
             ];
 

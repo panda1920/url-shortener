@@ -81,13 +81,16 @@
       },
 
       validateInput() {
-        const usernamePattern = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-        const passwordPattern = /^\S+$/;
+        const usernameIsEmail = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+        const passwordEmpty = /^$/;
+        const passwordHasSpaces = /.*\s.*/;
 
-        if (!usernamePattern.test(this.username))
+        if (!usernameIsEmail.test(this.username))
           throw { reason: 'username', message: 'Username must be a valid email address' };
-        else if (!passwordPattern.test(this.password))
+        else if (passwordEmpty.test(this.password))
           throw { reason: 'password', message: 'Password must not be empty' };
+        else if (passwordHasSpaces.test(this.password))
+          throw { reason: 'password', message: 'Password must not contain spaces' };
       },
 
       handleError(e) {
