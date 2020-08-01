@@ -1,4 +1,4 @@
-import { extractErrorObject } from './api-helper';
+import { extractErrorObject, sendApiRequest } from './api-helper';
 
 const userAuthMixin = {
     computed: {
@@ -18,7 +18,7 @@ const userAuthMixin = {
             
             if (!response.ok) {
                 const defaultErrorObject = { reason: null, message: 'api call failed' };
-                const errorObject = await extractErrorObject(responseJson);
+                const errorObject = extractErrorObject(responseJson);
                 throw errorObject ? errorObject : defaultErrorObject;
             }
 
@@ -59,24 +59,11 @@ const userAuthMixin = {
 };
 
 async function sendLoginRequest(username, password) {
-    let path = process.env.API_PATH || '/api';
-    path += '/users/login';
-
-    return window.fetch(path, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-    });
+    return sendApiRequest('/users/login', 'POST', null, { username, password });
 }
 
 async function requestNewToken(oldToken) {
-    let path = process.env.API_PATH || '/api';
-    path += '/users/refresh';
-
-    return window.fetch(path, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${oldToken}` },
-    });
+    return sendApiRequest('/users/refresh', 'GET', oldToken, null);
 }
 
 function retryRefresh(context, seconds = 0) {
