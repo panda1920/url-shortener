@@ -40,11 +40,12 @@
 
 <script>
   import userAuthMixin from '@/mixins/user-auth';
+  import shortenMixin from '@/mixins/shorten';
 
   export default {
     name: 'Home',
 
-    mixins: [userAuthMixin],
+    mixins: [userAuthMixin, shortenMixin],
 
     data: () => ({
       description: 'Make links shorter: the future of web',
@@ -62,7 +63,7 @@
         try {
           this.validateUrl();
           this.verifyAuthenticated();
-          this.shortUrl  = await this.shortenUrl();
+          this.shortUrl  = await this.shortenUrl(this.url);
         }
         catch(e) {
           this.handleError(e);
@@ -83,28 +84,6 @@
       verifyAuthenticated() {
         if (!this.isAuthenticated)
           throw { reason: null, message: 'You must be logged in to use our service' };
-      },
-
-      async shortenUrl() {
-        const response = await this.sendUrlToShortenApi();
-        const { shortUrl, errorObject } = await response.json();
-
-        if (response.ok)
-          return shortUrl;
-
-        const defaultErrorObject = { reason: null, message: 'Failed to shorten url' };
-        throw (errorObject !== undefined) ? errorObject : defaultErrorObject;
-      },
-
-      sendUrlToShortenApi() {
-        return window.fetch(process.env.API_PATH + '/shorten', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.token}`,
-          },
-          body: JSON.stringify({ url: this.url.trim() }),
-        });
       },
 
       handleError(e) {

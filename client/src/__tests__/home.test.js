@@ -7,14 +7,12 @@ describe('testing behavior of Home component', () => {
         returnedShortened: 'www.some-shortUrl-domain/asldjalsd',
         token: 'adasldghauasdlajhsdioajjsdasd',
     };
-    const mockedFetch = jest.fn()
-        .mockName('mocked fetch()')
-        .mockImplementation(() => Promise.resolve({
-            ok: true,
-            status: 200,
-            json: () => Promise.resolve({ shortUrl: TEST_DATA.returnedShortened }),
-        }));
-    let originalFetch;
+
+    const MOCKS = {
+        shortenUrl: jest.fn().mockName('mocked shortenUrl()')
+            .mockImplementation(() => ({ shortUrl: TEST_DATA.returnedShortened })),
+    };
+
     let originalEnv;
     let mountedComponent;
 
@@ -25,25 +23,26 @@ describe('testing behavior of Home component', () => {
     beforeEach(() => {
         mountedComponent = mountHome();
         
-        originalFetch = window.fetch;
-        window.fetch = mockedFetch;
         originalEnv = process.env;
         process.env = { ...TEST_ENV };
 
     });
     afterEach(() => {
-        mockedFetch.mockClear();
-        
-        window.fetch = originalFetch;
         process.env = originalEnv;
+
+        MOCKS.shortenUrl.mockClear();
     });
 
     function mountHome(customConfig = {}) {
-        const { loggedIn } = customConfig;
+        const { loggedIn, shortenUrl } = customConfig;
         const isAuthenticated = () => (loggedIn === false) ? false : true;
+        const shortenUrlImpl = shortenUrl ? shortenUrl : MOCKS.shortenUrl;
 
         return shallowMount(Home, {
-            mixins: [{ computed: { isAuthenticated, token: () => TEST_DATA.token } }],
+            mixins: [
+                { computed: { isAuthenticated, token: () => TEST_DATA.token } },
+                { methods: { shortenUrl: shortenUrlImpl } },
+            ],
         });
     }
 
@@ -152,72 +151,60 @@ describe('testing behavior of Home component', () => {
             expect(mountedComponent.vm.$data.error).not.toBe('');
         });
 
-        test('clicking on shorten should make api call if url is valid', async () => {
+        test('clicking on shorten should pass entered url to shortenUrl method', async () => {
             const url = 'www.google.com';
             mountedComponent.get('#url').setValue(url);
 
             await mountedComponent.get('#shorten-button').trigger('click');
 
-            expect(mockedFetch).toHaveBeenCalledTimes(1);
-            
-            const [apiEndpoint, options] = mockedFetch.mock.calls[0];
-            expect(apiEndpoint).toBe(TEST_ENV.API_PATH + '/shorten');
-            expect(options.method).toBe('POST');
-            expect(options.headers).toMatchObject({
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${TEST_DATA.token}`,
-            });
-            expect(JSON.parse(options.body)).toMatchObject({ url });
+            expect(MOCKS.shortenUrl).toHaveBeenCalledTimes(1);
+            const [urlArg] = MOCKS.shortenUrl.mock.calls[0];
+            expect(urlArg).toBe(url);
         });
 
-        test('clicking on shorten should make api call with trimmed url', async () => {
-            const url = '  www.google.com  ';
-            
-            await shortenUrlAction(url);
-
-            expect(mockedFetch).toHaveBeenCalledTimes(1);
-            const [_, options] = mockedFetch.mock.calls[0];
-            expect(JSON.parse(options.body)).toMatchObject({ url: url.trim() });
-        });
-
-        test('making api call should update shortUrl component state if successful', async () => {
+        test('clicking on shorten should display returned url from shortenUrl when request succesful', async () => {
             await shortenUrlAction();
 
-            expect(mountedComponent.vm.$data.shortUrl).toBe(TEST_DATA.returnedShortened);
+            const html = mountedComponent.get('#short-url').html();
+            expect(html).toMatch(TEST_DATA.returnedShortened);
         });
 
-        test('making api call should update error when api was not successful', async () => {
-            const errorObject = { reason: 'something', message: 'something failed catastrophically' };
-            const mockedFetch = jest.fn()
-            .mockName('mocked fail fetch()')
-            .mockImplementation(() => Promise.resolve({
-                ok: false,
-                status: 404,
-                json: () => Promise.resolve({ errorObject }),
-            }));
-            window.fetch = mockedFetch;
+        test('clicking on shorten should display error message raised by shortenUrl', async () => {
+            const errorObject = { reason: null, message: 'test_message_1' };
+            const errorShortenUrl = jest.fn()
+                .mockImplementation(() => { throw errorObject; });
+            mountedComponent = mountHome({ shortenUrl: errorShortenUrl });
 
             await shortenUrlAction();
 
-            expect(mountedComponent.vm.$data.error).toBe(errorObject.message);
+            const html = mountedComponent.get('#error').html();
+            expect(html).toMatch(errorObject.message);
         });
 
-        test('making api call should update error with default message when failed api call did not return error', async () => {
-            const defaultErrorMsg = 'Failed to shorten url';
-            const mockedFetch = jest.fn()
-            .mockName('mocked fail fetch()')
-            .mockImplementation(() => Promise.resolve({
-                ok: false,
-                status: 404,
-                json: () => Promise.resolve({}),
-            }));
-            window.fetch = mockedFetch;
+        test('clicking on shorten should apply error class to url input iff reason for error is url', async () => {
+            const errorObjects = [
+                { reason: 'url', message: 'test_message_1' },
+                { reason: null, message: 'test_message_1' },
+                { reason: 'something', message: 'test_message_1' },
+            ];
 
-            await shortenUrlAction();
+            const getClassesOfUrlInput = async (errorObject) => {
+                const errorShortenUrl = jest.fn()
+                    .mockImplementation(() => { throw errorObject; });
+                mountedComponent = mountHome({ shortenUrl: errorShortenUrl });
 
-            expect(mountedComponent.vm.$data.error).toBe(defaultErrorMsg);
+                await shortenUrlAction();
+
+                return mountedComponent.get('#url').element.classList;
+            };
+
+            expect( await getClassesOfUrlInput(errorObjects[0]) )
+                .toContain('input-error');
+            expect( await getClassesOfUrlInput(errorObjects[1]) )
+                .not.toContain('input-error');
+            expect( await getClassesOfUrlInput(errorObjects[2]) )
+                .not.toContain('input-error');
         });
-
         
         test('clicking on shorten button should reset error', async () => {
             mountedComponent.setData({ error: 'some_value' });
@@ -254,49 +241,6 @@ describe('testing behavior of Home component', () => {
             await mountedComponent.get('#url').trigger('keydown', { key: 'Enter' });
 
             expect(mountedComponent.vm.$data.error).not.toBe('');
-        });
-    });
-
-    describe('bad input state', () => {
-        test('when created badUrl state should be false', () => {
-            expect(mountedComponent.vm.$data.badUrl).toBe(false);
-        });
-        test('when fetch returns error with url as reason, badUrl should become true', async () => {
-            const errorObject = { reason: 'url', message: 'some url error' };
-            const mockedFetch = jest.fn()
-            .mockName('mocked fail fetch()')
-            .mockImplementation(() => Promise.resolve({
-                ok: false,
-                status: 404,
-                json: () => Promise.resolve({ errorObject }),
-            }));
-            window.fetch = mockedFetch;
-
-            await shortenUrlAction();
-
-            expect(mountedComponent.vm.$data.badUrl).toBe(true);
-        });
-        test('when fetch returns error with different reason, badUrl should stay false', async () => {
-            const errorObject = { reason: 'something', message: 'some error' };
-            const mockedFetch = jest.fn()
-            .mockName('mocked fail fetch()')
-            .mockImplementation(() => Promise.resolve({
-                ok: false,
-                status: 404,
-                json: () => Promise.resolve({ errorObject }),
-            }));
-            window.fetch = mockedFetch;
-
-            await shortenUrlAction();
-
-            expect(mountedComponent.vm.$data.badUrl).toBe(false);
-        });
-        test('when shorten is successfully processed, badUrl state should become false', async () => {
-            mountedComponent.setData({ badUrl: true });
-
-            await shortenUrlAction();
-
-            expect(mountedComponent.vm.$data.badUrl).toBe(false);
         });
     });
 
