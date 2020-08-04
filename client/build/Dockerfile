@@ -13,4 +13,4 @@ FROM nginx:latest
 WORKDIR /usr/share/nginx/html
 
 COPY --from=build /app/dist/* ./
-COPY --from=build /app/build/nginx/* /etc/nginx/
+COPY --from=build /app/build/nginx/nginx.prod.conf /etc/nginx/nginx.conf

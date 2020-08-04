@@ -252,6 +252,7 @@ describe('testing behavior of Home component', () => {
         // callback to the button is async
         // making api call is async
         // opening json of response is async
-        // therefore need 3 nextTick total (including imlicit one in trigger())
+        // therefore need 3 nextTick total to see result take effect
+        // (including imlicit one in trigger())
     }
 });

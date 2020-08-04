@@ -88,7 +88,7 @@ describe('testing behavior of Login component', () => {
             }).not.toThrow();
         });
 
-        test('test user credentials are not displayed when env is production', () => {
+        test('test user credentials are displayed when env is production', () => {
             process.env = {
                 NODE_ENV: 'production'
             };
@@ -96,7 +96,7 @@ describe('testing behavior of Login component', () => {
 
             expect(() => {
                 wrapper.get('#test-user-info');
-            }).toThrow();
+            }).not.toThrow();
         });
     });
 

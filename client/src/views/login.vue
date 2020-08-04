@@ -30,7 +30,8 @@
       </div>
     </div>
 
-    <div v-if='!isProduction' id='test-user-info'>
+    <!-- <div v-if='!isProduction' id='test-user-info'> -->
+    <div id='test-user-info'>
       <p>Use the following test user credential for testing/development.</p>
       <p>Email: admin@example.com</p>
       <p>Password: password</p>
