@@ -10,9 +10,9 @@ Vue.use(Router);
 const router = new Router({
     mode: 'history',
     routes: [
-        { path: '/', component: Home },
         { path: '/login', component: Login },
         { path: '/error', component: NotFound },
+        { path: '*', component: Home },
     ],
 });
 

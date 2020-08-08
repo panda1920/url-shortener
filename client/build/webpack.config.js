@@ -23,7 +23,8 @@ module.exports = env => {
         },
         output: {
             filename: '[name].bundle.js',
-            path: path.join(projectRoot, 'dist')
+            path: path.join(projectRoot, 'dist'),
+            publicPath: '/'
         },
         resolve: {
             extensions: ['.vue', '.js', '.json'],

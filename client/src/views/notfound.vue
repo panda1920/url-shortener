@@ -1,6 +1,8 @@
 <template>
   <div class='not-found'>
-    Page not found
+    <h3>
+      Page not found
+    </h3>
   </div>
 </template>
 
